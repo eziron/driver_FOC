@@ -14,3 +14,5 @@ manuscrito/*.out
 manuscrito/*.run.xml
 manuscrito/*.synctex.gz
 manuscrito/*.toc
+Hardware/*/*.b#*
+Hardware/*/*.s#*
