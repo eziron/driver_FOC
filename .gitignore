@@ -1,0 +1,16 @@
+Firmware_H7/build/*.d
+Firmware_H7/build/*.lst
+Firmware_H7/build/*.o
+Firmware_H7/build/*.map
+*/.vscode
+manuscrito/*.aux
+manuscrito/*.bbl
+manuscrito/*.bcf
+manuscrito/*.blg
+manuscrito/*.fdb_latexmk
+manuscrito/*.fls
+manuscrito/*.log
+manuscrito/*.out
+manuscrito/*.run.xml
+manuscrito/*.synctex.gz
+manuscrito/*.toc

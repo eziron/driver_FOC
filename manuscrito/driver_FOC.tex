@@ -1,0 +1,157 @@
+\documentclass[11pt]{report}
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{amsmath}
+\usepackage{helvet}
+\usepackage{titlesec}
+\usepackage{setspace}
+\usepackage{tocloft}
+\usepackage{hyperref}
+\usepackage{csquotes}
+\usepackage[style=numeric,sorting=none]{biblatex} % Carga el paquete biblatex con estilo numérico
+\addbibresource{referencias.bib} % Indica el archivo .bib
+
+\onehalfspacing
+\renewcommand{\familydefault}{\sfdefault}
+
+\geometry{
+  letterpaper,
+  left=3cm,
+  right=2cm,
+  top=2.5cm,
+  bottom=2cm,
+}
+
+\addto\captionsspanish{
+  \renewcommand{\contentsname}{Índice}
+}
+\renewcommand{\cftchapdotsep}{\cftdotsep}  % Para capítulos
+\renewcommand{\cftsecdotsep}{\cftdotsep}   % Para secciones
+\renewcommand{\cftsubsecdotsep}{\cftdotsep} % Para subsecciones
+
+\titleformat{\chapter}[display]
+  {\normalfont\Large\bfseries}
+  {\chaptername\ \thechapter}
+  {10pt}
+  {\huge}
+\titlespacing*{\chapter}{0pt}{-20pt}{20pt}  % Ajusta el espaciado aquí
+
+\begin{document}
+
+% Title page
+\begin{titlepage}
+  \begin{center}
+    \includegraphics[width=0.4\textwidth]{imagenes/logo_ubb.png}\\
+    \normalsize FACULTAD DE INGENIERÍA\\
+    DEPTO. INGENIERÍA ELÉCTRICA Y ELECTRÓNICA\\[2cm]
+    
+    \LARGE \textbf{``Implementación de un Controlador FOC para Motores Brushless con Encoder Utilizando STM32''}\\[6cm]
+    
+    \normalsize AUTOR:\\
+    RODRIGO FUENTES PEDREROS\\[3cm]
+    
+    SEMINARIO PARA OPTAR AL TÍTULO DE\\
+    INGENIERO DE EJECUCIÓN EN ELECTRÓNICA\\[1cm]
+    
+    CONCEPCIÓN – CHILE\\
+    AÑO 2024\\
+  \end{center}
+\end{titlepage}
+
+% Back title page
+\begin{titlepage}
+  \begin{center}
+    \includegraphics[width=0.4\textwidth]{imagenes/logo_ubb.png}\\
+    \normalsize FACULTAD DE INGENIERÍA\\
+    DEPTO. INGENIERÍA ELÉCTRICA Y ELECTRÓNICA\\[2cm]
+    
+    \LARGE \textbf{``Implementación de un Controlador FOC para Motores Brushless con Encoder Utilizando STM32''}\\[5cm]
+    
+    \normalsize AUTOR\\
+    RODRIGO FUENTES PEDREROS\\[3cm]
+    
+    \large PROFESOR GUÍA:\\
+    \large ANGEL ERNESTO RUBIO\\[1cm]
+    \large PROFESORES GUÍA ADJUNTO:\\
+    \large PEDRO MELIN COLINA
+  \end{center}
+\end{titlepage}
+
+\normalsize
+\pagenumbering{arabic}
+\setcounter{page}{3}
+
+\newpage
+\tableofcontents
+
+%\newpage
+%\listoffigures
+
+%\newpage
+%\listoftables
+
+
+\newpage
+\chapter*{Objetivos}
+\addcontentsline{toc}{chapter}{Objetivos}
+\section*{Objetivo General}
+Implementar un controlador de tipo FOC (Control de Campo Orientado) para motores brushless con encoder, utilizando un microcontrolador STM32, que sirva de base para un driver especializado en la robótica competitiva.
+
+\section*{Objetivos Especificos}
+\begin{itemize}
+    \item Estudiar los principios del Control de Campo Orientado (FOC) y la modulación de espacio vectorial (SVM) para aplicarlos en el diseño del controlador.
+    \item Diseñar el hardware para el controlador FOC, con los componentes mínimos necesarios para validar el funcionamiento.
+    \item Configurar y programar el microcontrolador para el algoritmo FOC, utilizando las librerías HAL de STM32
+    \item Validar el funcionamiento del controlador y proponer posibles mejoras para su aplicación en robótica competitiva.
+\end{itemize}
+
+\newpage
+\chapter*{Resumen}
+\addcontentsline{toc}{chapter}{Resumen}
+
+\newpage
+\chapter*{Introducción}
+\addcontentsline{toc}{chapter}{Introducción}
+
+\newpage
+\chapter{Estado del Arte}
+\section{Fundamentos del Control FOC}
+\section{Análisis de Proyectos Existentes}
+
+\newpage
+\chapter{Diseño de Hardware para el Controlador FOC}
+\section{Parametrización del Hardware para el Controlador FOC}
+\section{Implementación del Diseño Electrónico}
+
+\newpage
+\chapter{Configuración del STM32 con STM32CubeMX}
+
+\newpage
+\chapter{Implementación del Algoritmo de Control FOC}
+
+\newpage
+\chapter{Validación y Pruebas de Control FOC}
+Este es un documento de ejemplo. Aquí hay una referencia a un libro \cite{power_conv_00}.
+
+Este es un documento de ejemplo. Aquí hay una referencia a un libro \cite{AN2757_00}.
+
+Este es un documento de ejemplo. Aquí hay una referencia a un libro \cite{odrive_SVM}.
+
+\newpage
+\chapter*{Comentarios y Conclusiones}
+\addcontentsline{toc}{chapter}{Comentarios y Conclusiones}
+
+\newpage
+\addcontentsline{toc}{chapter}{Bibliografía}
+\printbibliography
+
+\newpage
+\addcontentsline{toc}{chapter}{Anexos}
+
+\chapter*{Anexo A}
+\addcontentsline{toc}{section}{Anexo A}
+
+\end{document}
