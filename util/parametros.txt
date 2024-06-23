@@ -1,0 +1,121 @@
+TIMER_PERIOD 5000
+START_PERIOD 0
+DEAD_TIME 109
+
+TIMER_PRESCALER 0
+TIMER_REPETICION_COUNTER 0
+
+TIMER_ADC_DELTA 60
+TIMER_ADC_CCR (TIMER_PERIOD - 60)
+
+INPUT_FILTER 5
+
+sector de memoria para DMA y BDMA:
+
+  .D1_data :
+  {
+    . = ALIGN(4);
+    *(.D1_data)   /* Variables del DMA */
+    *(.D1_data*)  /* Variables del DMA (wildcard) */
+
+    . = ALIGN(4);
+  } > RAM_D1
+
+  .D2_data :
+  {
+    . = ALIGN(4);
+    *(.D2_data)   /* Variables del DMA */
+    *(.D2_data*)  /* Variables del DMA (wildcard) */
+
+    . = ALIGN(4);
+  } > RAM_D2
+
+  .D3_data :
+  {
+    . = ALIGN(4);
+    *(.D3_data)   /* Variables del DMA */
+    *(.D3_data*)  /* Variables del DMA (wildcard) */
+
+    . = ALIGN(4);
+  } > RAM_D3
+
+
+#define __ATTR_RAM_D1 __attribute__((section(".D1_data")))
+#define __ATTR_RAM_D2 __attribute__((section(".D2_data")))
+#define __ATTR_RAM_D3 __attribute__((section(".D3_data")))
+
+--------------------------------------------
+
+USB con printf
+
+linkerFlags: 
+  - -u _printf_float
+
+#include <stdio.h>
+#include "usbd_cdc_if.h"
+
+int _write(int file, char *ptr, int len)
+{
+  static uint8_t rc = USBD_OK;
+  do
+  {
+    rc = CDC_Transmit_FS((uint8_t *)ptr, len);
+  } while (USBD_BUSY == rc);
+
+  return len;
+}
+
+--------------------------------------------
+
+Configuracion del MPU
+
+CPU ICache = ENABLE
+CPU DCache = ENABLE
+
+//general
+MPU Sub Region Disable = 0x00
+MPU Access Permission = ALL ACCESS PERMITTED
+
+//RAM D1/D2/D3
+MPU Instruction  = DISABLE
+MPU Shareability = ENABLE
+MPU Cacheable    = DISABLE
+MPU Bufferable   = ENABLE
+
+//RAM_D1
+MPU Region Base Address = 0x24000000
+MPU Region Size = 512KB
+
+//RAM_D2
+MPU Region Base Address = 0x30000000
+MPU Region Size = 256KB
+
+//RAM_D3
+MPU Region Base Address = 0x38000000
+MPU Region Size = 64KB
+
+//RAM DTCM
+MPU Instruction  = ENABLE
+MPU Shareability = DISABLE
+MPU Cacheable    = ENABLE
+MPU Bufferable   = ENABLE
+
+MPU Region Base Address = 0x20000000
+MPU Region Size = 128KB
+
+
+--------------------------------------------
+
+DSP lib
+
+libraryDirectories: 
+  - Drivers/CMSIS/DSP/**
+
+includeDirectories: 
+  - Drivers/CMSIS/DSP/Include/**
+
+sourceFiles:  
+  - Drivers/CMSIS/DSP/Source/ControllerFunctions/arm_sin_cos_f32.c
+  - Drivers/CMSIS/DSP/Source/CommonTables/arm_common_tables.c
+
+
