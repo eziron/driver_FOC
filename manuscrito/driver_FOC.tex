@@ -11,6 +11,7 @@
 \usepackage{tocloft}
 \usepackage{hyperref}
 \usepackage{csquotes}
+\usepackage{placeins}
 \usepackage[style=numeric,sorting=none]{biblatex} % Carga el paquete biblatex con estilo numérico
 \addbibresource{referencias.bib} % Indica el archivo .bib
 
@@ -41,43 +42,46 @@
 
 \begin{document}
 
+
+
 % Title page
 \begin{titlepage}
-  \begin{center}
-    \includegraphics[width=0.4\textwidth]{imagenes/logo_ubb.png}\\
-    \normalsize FACULTAD DE INGENIERÍA\\
-    DEPTO. INGENIERÍA ELÉCTRICA Y ELECTRÓNICA\\[2cm]
-    
-    \LARGE \textbf{``Implementación de un Controlador FOC para Motores Brushless con Encoder Utilizando STM32''}\\[6cm]
-    
-    \normalsize AUTOR:\\
-    RODRIGO FUENTES PEDREROS\\[3cm]
-    
-    SEMINARIO PARA OPTAR AL TÍTULO DE\\
-    INGENIERO DE EJECUCIÓN EN ELECTRÓNICA\\[1cm]
-    
-    CONCEPCIÓN – CHILE\\
-    AÑO 2024\\
-  \end{center}
+	\begin{center}
+		\includegraphics[width=0.4\textwidth]{imagenes/logo_ubb.png}\\
+		\normalsize FACULTAD DE INGENIERÍA\\
+		DEPTO. INGENIERÍA ELÉCTRICA Y ELECTRÓNICA\\[2cm]
+
+		\LARGE \textbf{``Implementación de un Controlador FOC para Motores Brushless con Encoder Utilizando STM32''}\\[6cm]
+
+		\normalsize AUTOR:\\
+		RODRIGO FUENTES PEDREROS\\
+		\href{https://www.youtube.com/watch?v=dQw4w9WgXcQ}{\phantom{ASDF}}\\[2cm]
+
+		SEMINARIO PARA OPTAR AL TÍTULO DE\\
+		INGENIERO DE EJECUCIÓN EN ELECTRÓNICA\\[1cm]
+
+		CONCEPCIÓN – CHILE\\
+		AÑO 2024\\
+	\end{center}
 \end{titlepage}
 
 % Back title page
 \begin{titlepage}
-  \begin{center}
-    \includegraphics[width=0.4\textwidth]{imagenes/logo_ubb.png}\\
-    \normalsize FACULTAD DE INGENIERÍA\\
-    DEPTO. INGENIERÍA ELÉCTRICA Y ELECTRÓNICA\\[2cm]
-    
-    \LARGE \textbf{``Implementación de un Controlador FOC para Motores Brushless con Encoder Utilizando STM32''}\\[5cm]
-    
-    \normalsize AUTOR\\
-    RODRIGO FUENTES PEDREROS\\[3cm]
-    
-    \large PROFESOR GUÍA:\\
-    \large ANGEL ERNESTO RUBIO\\[1cm]
-    \large PROFESORES GUÍA ADJUNTO:\\
-    \large PEDRO MELIN COLINA
-  \end{center}
+	\begin{center}
+		\includegraphics[width=0.4\textwidth]{imagenes/logo_ubb.png}\\
+		\normalsize FACULTAD DE INGENIERÍA\\
+		DEPTO. INGENIERÍA ELÉCTRICA Y ELECTRÓNICA\\[2cm]
+
+		\LARGE \textbf{``Implementación de un Controlador FOC para Motores Brushless con Encoder Utilizando STM32''}\\[5cm]
+
+		\normalsize AUTOR\\
+		RODRIGO FUENTES PEDREROS\\[3cm]
+
+		\large PROFESOR GUÍA:\\
+		\large ANGEL ERNESTO RUBIO\\[1cm]
+		\large PROFESORES GUÍA ADJUNTO:\\
+		\large PEDRO MELIN COLINA
+	\end{center}
 \end{titlepage}
 
 \normalsize
@@ -102,10 +106,10 @@ Implementar un controlador de tipo FOC (Control de Campo Orientado) para motores
 
 \section*{Objetivos Especificos}
 \begin{itemize}
-    \item Estudiar los principios del Control de Campo Orientado (FOC) y la modulación de espacio vectorial (SVM) para aplicarlos en el diseño del controlador.
-    \item Diseñar el hardware para el controlador FOC, con los componentes mínimos necesarios para validar el funcionamiento.
-    \item Configurar y programar el microcontrolador para el algoritmo FOC, utilizando las librerías HAL de STM32
-    \item Validar el funcionamiento del controlador y proponer posibles mejoras para su aplicación en robótica competitiva.
+	\item Estudiar los principios del Control de Campo Orientado (FOC) y la modulación de espacio vectorial (SVM) para aplicarlos en el diseño del controlador.
+	\item Diseñar el hardware para el controlador FOC, con los componentes mínimos necesarios para validar el funcionamiento.
+	\item Configurar y programar el microcontrolador para el algoritmo FOC, utilizando las librerías HAL de STM32
+	\item Validar el funcionamiento del controlador y proponer posibles mejoras para su aplicación en robótica competitiva.
 \end{itemize}
 
 \newpage
@@ -119,11 +123,77 @@ Implementar un controlador de tipo FOC (Control de Campo Orientado) para motores
 \newpage
 \chapter{Estado del Arte}
 \section{Fundamentos del Control FOC}
+
+El control FOC es solo uno de los diversos tecnicas de control para motores bruhsless o BLDC, existen otras tecnicas como el control de 6 pasos,que es mas usado en controladors ESC de drones por su simplecidad tando de algoritmo como de hardware, ya que no requiere de un encoder para el feedback de posicion y velocidad ni tampoco requiere estrictamente una medicion de Corriente, aun que los ESC de media-alta gama incorporan medicion de corriente de bus para proteccion del motor. tambien existe el control directo de torque, que es mas comun su uso en motores de media alta potencia, aun que existen algunos trabajos despecto a su aplicacion de motores bruhsless y BLCD, los cuales resaltan su beneficio en timpos de respuesta y mayor simplecidad de algoritmo, no existen placas comersiales que implemente esta estrategia de control para su aplicacion en robotica.
+
+\subsection{Transformada Clarke}
+\begin{figure}[ht]
+	\centering
+	\includegraphics{imagenes/clarke.jpg}
+	\caption{Transformada Clarke.}
+\end{figure}
+\FloatBarrier
+
+\subsection{Transformada Park}
+\begin{figure}[ht]
+	\centering
+	\includegraphics{imagenes/park.jpg}
+	\caption{Transformada Park.}
+\end{figure}
+\FloatBarrier
+
+\subsection{Controladores PI}
+
+\subsection{Transformada Park Inversa}
+\begin{figure}[ht]
+	\centering
+	\includegraphics{imagenes/park_inv.jpg}
+	\caption{Transformada Park Inversa.}
+\end{figure}
+
+\subsection{Modulacion de Espacio Vectorial}
+
+\newpage
 \section{Análisis de Proyectos Existentes}
+\subsection{Odrive}
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[scale=0.5]{imagenes/odrive_img.jpg}
+	\caption{Odrive 3.6}
+\end{figure}
+\FloatBarrier
+
+Odrive es uno de los controladores FOC comerciales mas populares para su uso en robotica por su gran versatilidad en sus ajsutes y un desempeño exelente para la mayoria de usos. internamente tiene opciones para control de torque, velocidad y posicion.
+
+la version mas popular y generalemtne usada es Odrive 3.6, puede controlar 2 motores de forma simultanea, con hasta 56V y 70A continuos por motor,su codigo es open sourse, aun que solo hasta la vercion 3.5 mantuvo el open hardware, pero actualmente estas verciones estan descontinuadas, ya que el desarrollador esta trabajando en la vercion Odrive PRO.
+
+aun que Odrive tiene un pequeño problema en su forma de operar internamente y es que su bucle se ejecuta a 8000hz, con un PWM de 24.000hz, esto principalemnte limita la electrica maxima que el motor puede controlar a un aproximado de 80.000 ERPM, lo que corresponde a 6 ciclos del bucle por cada giro electronico
+
+\subsection{Vesc project}
+\begin{figure}[ht]
+	\centering
+	\includegraphics[scale=0.5]{imagenes/Vesc_00.jpg}
+	\caption{Vesc 6}
+\end{figure}
+\FloatBarrier
+
+
+\subsection{SimpleFOC}
+\begin{figure}[ht]
+	\centering
+	\includegraphics[scale=0.05]{imagenes/simpleFOC.jpeg}
+	\caption{SimpleFOC}
+\end{figure}
+\FloatBarrier
+
+SipleFOC \cite{Skuric_SimpleFOC_A_Field_2022} es una libreria Open Sourse para implementar controladores FOC utilizando arduino IDE o PlatformIO para compilar
 
 \newpage
 \chapter{Diseño de Hardware para el Controlador FOC}
 \section{Parametrización del Hardware para el Controlador FOC}
+\subsection{Sensores de Corriente}
+\subsection{Puente MOSFET}
 \section{Implementación del Diseño Electrónico}
 
 \newpage

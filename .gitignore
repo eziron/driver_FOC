@@ -4,7 +4,7 @@ Firmware_H7/build/*.o
 Firmware_H7/build/*.map
 */.vscode
 manuscrito/*.aux
-manuscrito/*.bbl
+manuscrito/*.bbl*
 manuscrito/*.bcf
 manuscrito/*.blg
 manuscrito/*.fdb_latexmk
@@ -12,7 +12,7 @@ manuscrito/*.fls
 manuscrito/*.log
 manuscrito/*.out
 manuscrito/*.run.xml
-manuscrito/*.synctex.gz
+manuscrito/*.synctex.*
 manuscrito/*.toc
 Hardware/*/*.b#*
 Hardware/*/*.s#*
