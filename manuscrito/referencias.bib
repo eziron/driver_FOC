@@ -1,3 +1,4 @@
+#la biblia
 @book{power_conv_00,
   author    = {Bin Wu},
   title     = {High-Power Converters and AC Drives},
@@ -7,35 +8,92 @@
   edition   = {1},
   address   = {Hoboken, NJ},
   isbn      = {978-0471731719},
-  url       = {https://ieeexplore.ieee.org/servlet/opac?bknumber=5237895},
+  url       = {https://ieeexplore.ieee.org/servlet/opac?bknumber=5237895}
 }
 
+#microchip FOC
 @manual{AN2757_00,
-  title        = {Sensored (Encoder-Based) Field Oriented Control of a Three Phase Permanent Magnet Synchronous Motor (PMSM)},
-  author       = {{Microchip Technology Inc.}},
-  year         = {2018},
-  month        = {4},
-  note         = {AN2757},
-  url          = {https://www.microchip.com/en-us/application-notes/an2757},
-  pages        = {155-161},
+  title  = {Sensored (Encoder-Based) Field Oriented Control of a Three Phase Permanent Magnet Synchronous Motor (PMSM)},
+  author = {{Microchip Technology Inc.}},
+  year   = {2018},
+  month  = {4},
+  note   = {AN2757},
+  url    = {https://www.microchip.com/en-us/application-notes/an2757}
 }
 
+#SVM de Odrive
 @misc{odrive_SVM,
   author       = {Oskar Weigl},
   title        = {ODrive Firmware},
   howpublished = {\url{https://github.com/odriverobotics/ODrive/blob/fw-v0.5.6/Firmware/MotorControl/utils.cpp}},
-  note         = {Función SVM, líneas 10-123, TAG:fw-v0.5.6},
+  note         = {Función SVM, líneas 10-123, TAG:fw-v0.5.6}
 }
 
+#Simple FOC
 @article{Skuric_SimpleFOC_A_Field_2022,
-author = {Skuric, Antun and Bank, Hasan Sinan and Unger, Richard and Williams, Owen and González-Reyes, David},
-doi = {10.21105/joss.04232},
-journal = {Journal of Open Source Software},
-month = jun,
-number = {74},
-pages = {4232},
-title = {{SimpleFOC: A Field Oriented Control (FOC) Library for Controlling Brushless Direct Current (BLDC) and Stepper Motors}},
-url = {https://doi.org/10.21105/joss.04232},
-volume = {7},
-year = {2022}
+  author  = {Skuric, Antun and Bank, Hasan Sinan and Unger, Richard and Williams, Owen and González-Reyes, David},
+  doi     = {10.21105/joss.04232},
+  journal = {Journal of Open Source Software},
+  month   = jun,
+  number  = {74},
+  pages   = {4232},
+  title   = {{SimpleFOC: A Field Oriented Control (FOC) Library for Controlling Brushless Direct Current (BLDC) and Stepper Motors}},
+  url     = {https://doi.org/10.21105/joss.04232},
+  volume  = {7},
+  year    = {2022}
 }
+
+
+#Referencias trapezoidal
+
+#referencia a la secuencia de arranque
+@thesis{Gualtieri2018,
+  author      = {Matias Gualtieri Lara},
+  title       = {Sensorless Brushless DC Motors. Development and comparison of different fault tolerant control algorithms},
+  year        = 2018,
+  month       = mar,
+  pages       = {26-28},
+  school      = {Politecnico di Torino},
+  type        = {Tesi di Laurea Magistrale},
+  address     = {Corso di laurea magistrale in Ingegneria Aerospaziale},
+  note        = {Relatore: Prof. Paolo Maggiore},
+  institution = {Politecnico di Torino},
+  url         = {http://webthesis.biblio.polito.it/id/eprint/6891}
+}
+
+#referencia polarizacion de las fases
+@thesis{fisher2014high,
+  title       = {High Performance Brushless DC Motor Control},
+  author      = {Fisher, Patrick},
+  school      = {CQUniversity Australia},
+  year        = {2014},
+  month       = May,
+  pages       = {3},
+  type        = {Bachelor of Engineering Thesis},
+  note        = {Final year research project report submitted in partial fulfillment of the coursework requirements for the degree of Bachelor of Engineering},
+  institution = {School of Engineering \& Technology, CQUniversity Australia},
+  url         = {https://www.ti.com/lit/an/sprt703/sprt703.pdf}
+}
+
+#referencia deteccion de BEMF
+@mastersthesis{shao2003direct,
+  title    = {{Direct Back EMF Detection Method for Sensorless Brushless DC (BLDC) Motor Drives}},
+  author   = {Shao, Jianwen},
+  school   = {Virginia Polytechnic Institute and State University},
+  year     = {2003},
+  pages    = {11-16},
+  address  = {Blacksburg, Virginia},
+  month    = September,
+  keywords = {Sensorless BLDC drive, direct back EMF sensing, start-up},
+  url      = {http://educypedia.karadimov.info/library/T.pdf}
+}
+
+%referencia baja presicion y alto ripple del control trapezoidal
+@misc{juanpere_tecnicas,
+  title        = {{Técnicas de control para motores Brushless: Comparativa entre conmutación Trapezoidal, conmutación Sinusoidal y Control Vectorial}},
+  author       = {Roger Juanpere Tolrà},
+  organization = {ingenia-cat - Motion Control Department},
+  address      = {C./Llacuna 162, Barcelona - Spain},
+  url          = {https://www.motronic.es/upfiles/taller_img/files/mantenimiento-y-reparacion-de-servomotores-es_2595.pdf}
+}
+

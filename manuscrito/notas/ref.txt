@@ -1,0 +1,14 @@
+\tiny: Tamaño muy pequeño.
+\scriptsize: Tamaño para subíndices y superíndices.
+\footnotesize: Tamaño para notas al pie.
+\small: Tamaño un poco más pequeño que el texto normal.
+\normalsize: Tamaño de texto normal (predeterminado).
+\large: Tamaño un poco más grande que el normal.
+\Large: Tamaño más grande.
+\LARGE: Tamaño aún más grande.
+\huge: Tamaño muy grande.
+\Huge: Tamaño extremadamente grande.
+//estos se mantienen en todo el texto que tengan en frente hasta que otro "modificador" lo cambie
+
+
+\textbf{//texto en negrita}
