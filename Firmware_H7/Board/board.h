@@ -42,7 +42,7 @@
 // parametros encoder
 #define ENCODER_PPR 2048                        // puntos por revolucion en resolucion x4
 #define ENCODER_TPP (1.0 / (double)ENCODER_PPR) // vueltas por punto
-#define ENCODER_BUFFER_SIZE 6
+#define ENCODER_BUFFER_SIZE 3
 #define ENCODER_MAX_TICK_DIFF (TIMER_CLK / 100) // 10ms en ticks
 
 // parametros ADC
