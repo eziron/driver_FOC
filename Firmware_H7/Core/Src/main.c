@@ -110,11 +110,9 @@ debug_data_t debug_data __ATTR_RAM_D1 = {0};
 void SystemClock_Config(void);
 void PeriphCommonClock_Config(void);
 static void MPU_Config(void);
+/* USER CODE BEGIN PFP */
 void Start_TIM1_PWM(void);
 void Stop_TIM1_PWM(void);
-
-/* USER CODE BEGIN PFP */
-
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
