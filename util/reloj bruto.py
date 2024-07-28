@@ -34,13 +34,18 @@ PLL2
     DIVM = 2
     DIVN = 16
     DIVP = 2
+    
+PLL3
+    DIVM = 2
+    DIVN = 16
+    DIVP = 10
 """
 
 
 
 
 CLK_freq = 25.0
-Target_DIVP = 36.0
+Target_DIVP = 20.0
 Target_DIVQ = None
 Target_DIVR = None
 

@@ -16,3 +16,4 @@ Firmware_H7/build/*.map
 *.toc
 Hardware/*/*.b#*
 Hardware/*/*.s#*
+*.Identifier
