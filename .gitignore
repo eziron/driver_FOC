@@ -17,3 +17,4 @@ Firmware_H7/build/*.map
 Hardware/*/*.b#*
 Hardware/*/*.s#*
 *.Identifier
+Hardware/3D/OldVersions
