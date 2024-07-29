@@ -45,6 +45,7 @@ Board/state_machine.c \
 Board/util.c \
 Core/Src/adc.c \
 Core/Src/bdma.c \
+Core/Src/dma.c \
 Core/Src/gpio.c \
 Core/Src/main.c \
 Core/Src/memorymap.c \

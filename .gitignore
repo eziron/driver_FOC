@@ -18,3 +18,5 @@ Hardware/*/*.b#*
 Hardware/*/*.s#*
 *.Identifier
 Hardware/3D/OldVersions
+Firmware_H7/build/*.bin
+Firmware_H7/build/*.hex
