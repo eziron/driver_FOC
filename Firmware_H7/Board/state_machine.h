@@ -18,6 +18,8 @@ typedef enum
     GO_INDEX,
     OFFSET_CALIB,
 
+    TEST_SVM_SIGNALS,
+
     TEST_OPEN_LOOP,
     TEST_CLOSE_LOOP,
     TEST_PHASE,

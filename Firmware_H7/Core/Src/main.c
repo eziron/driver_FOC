@@ -75,7 +75,8 @@ CurrentSystem CURRENT = {0};
 ControllerDQ_t CURRENT_CONTROLLER = {0};
 float Ibus;
 
-uint16_t ADC3_DMA[5] __ATTR_RAM_D3 = {0};
+uint16_t ADC2_DMA[ADC2_DMA_SAMPLES] __ATTR_RAM_D2 = {0};
+uint16_t ADC3_DMA[ADC3_DMA_SAMPLES] __ATTR_RAM_D3 = {0};
 
 ADCSystem ADC_VBUS = {0};
 float Vbus;
@@ -89,9 +90,9 @@ float POT_B = 0.0f;
 ADCSystem ADC_POT_C = {0};
 float POT_C = 0.0f;
 
-ButtonDebounce_t BD13 = {0};
-ButtonDebounce_t BD14 = {0};
-ButtonDebounce_t BD15 = {0};
+ButtonDebounce_t SW1 = {0};
+ButtonDebounce_t SW2 = {0};
+ButtonDebounce_t SW3 = {0};
 
 bool PWM_EN = false;
 bool SVM_EN = false;
@@ -112,8 +113,9 @@ void SystemClock_Config(void);
 void PeriphCommonClock_Config(void);
 static void MPU_Config(void);
 /* USER CODE BEGIN PFP */
-void Start_TIM1_PWM(void);
-void Stop_TIM1_PWM(void);
+void Enable_TIM1_PWM(void);
+void Disable_TIM1_PWM(void);
+void SM_force_stop(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -122,9 +124,9 @@ void Stop_TIM1_PWM(void);
 /* USER CODE END 0 */
 
 /**
-  * @brief  The application entry point.
-  * @retval int
-  */
+ * @brief  The application entry point.
+ * @retval int
+ */
 int main(void)
 {
 
@@ -206,11 +208,11 @@ int main(void)
 
   SetupControllerDQ(&CURRENT_CONTROLLER, CURRENT_P_GAIN, CURRENT_I_GAIN);
 
-  InitButtonDebounce(&BD13, &TIMER_TICK, GPIOD, GPIO_PIN_13, ONE_MS_TICK * 20);
-  InitButtonDebounce(&BD14, &TIMER_TICK, GPIOD, GPIO_PIN_14, ONE_MS_TICK * 20);
-  InitButtonDebounce(&BD15, &TIMER_TICK, GPIOD, GPIO_PIN_15, ONE_MS_TICK * 20);
+  InitButtonDebounce(&SW1, &TIMER_TICK, SW_1_GPIO_Port, SW_1_Pin, ONE_MS_TICK * 20);
+  InitButtonDebounce(&SW2, &TIMER_TICK, SW_2_GPIO_Port, SW_2_Pin, ONE_MS_TICK * 20);
+  InitButtonDebounce(&SW3, &TIMER_TICK, SW_3_GPIO_Port, SW_3_Pin, ONE_MS_TICK * 20);
 
-  Stop_TIM1_PWM();
+  Disable_TIM1_PWM();
 
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
   HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
@@ -219,7 +221,9 @@ int main(void)
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
   HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3);
 
-  Stop_TIM1_PWM();
+  HAL_GPIO_WritePin(EN_GATE_GPIO_Port, EN_GATE_Pin, GPIO_PIN_RESET);
+
+  Disable_TIM1_PWM();
 
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);
 
@@ -231,13 +235,17 @@ int main(void)
 
   HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET, ADC_SINGLE_ENDED);
   // HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET_LINEARITY, ADC_SINGLE_ENDED);
-  HAL_ADCEx_InjectedStart(&hadc1);
+  HAL_ADCEx_InjectedStart(&hadc1); // medicien de corriente en fase
+
+  HAL_ADCEx_Calibration_Start(&hadc2, ADC_CALIB_OFFSET, ADC_SINGLE_ENDED);
+  // HAL_ADCEx_Calibration_Start(&hadc2, ADC_CALIB_OFFSET_LINEARITY, ADC_SINGLE_ENDED);
+  HAL_ADC_Start_DMA(&hadc2, (uint32_t *)ADC2_DMA, ADC2_DMA_SAMPLES); // potenciometros
 
   HAL_ADCEx_Calibration_Start(&hadc3, ADC_CALIB_OFFSET, ADC_SINGLE_ENDED);
   // HAL_ADCEx_Calibration_Start(&hadc3, ADC_CALIB_OFFSET_LINEARITY, ADC_SINGLE_ENDED);
-  HAL_ADC_Start_DMA(&hadc3, (uint32_t *)ADC3_DMA, 5);
+  HAL_ADC_Start_DMA(&hadc3, (uint32_t *)ADC3_DMA, ADC3_DMA_SAMPLES); // voltaje de bus, Vref e IC temp
 
-  SM_update_task(&SM);
+  SM_clear_task(&SM);
   HAL_Delay(1);
   HAL_TIM_Base_Start_IT(&htim1);
 
@@ -248,18 +256,18 @@ int main(void)
 #endif
 
   HAL_Delay(1000);
-  printf("\n1/tau: %.10lf\n", CURRENT_FILTER_CUT_FREC);
-  printf("P_GAIN: %.10lf\n", CURRENT_P_GAIN);
-  printf("I_GAIN: %.10lf\n\n", CURRENT_I_GAIN);
-  printf("iniciando calibracion del motor...\n");
-  // HAL_Delay(1000);
+  // printf("\n1/tau: %.10lf\n", CURRENT_FILTER_CUT_FREC);
+  // printf("P_GAIN: %.10lf\n", CURRENT_P_GAIN);
+  // printf("I_GAIN: %.10lf\n\n", CURRENT_I_GAIN);
+  // printf("iniciando calibracion del motor...\n");
+  //  HAL_Delay(1000);
 
-  SM_add_task(&SM, START_SECUENCE);
-  HAL_Delay(1);
-  SM_wait_IDLE(&SM);
-  HAL_Delay(1);
+  // SM_add_task(&SM, START_SECUENCE);
+  // HAL_Delay(1);
+  // SM_wait_IDLE(&SM);
+  // HAL_Delay(1);
 
-  printf("OFFSET_IA: %ld / OFFSET_IB: %ld / Vbus: %.8f\n", CURRENT.phase_A.OFFSET, CURRENT.phase_B.OFFSET, Vbus);
+  // printf("OFFSET_IA: %ld / OFFSET_IB: %ld / Vbus: %.8f\n", CURRENT.phase_A.OFFSET, CURRENT.phase_B.OFFSET, Vbus);
 
   // SM_add_task(&SM, CALIB_SECUENCE);
   // HAL_Delay(1);
@@ -313,31 +321,32 @@ int main(void)
   while (1)
   {
 
-    if (DebounceButton(&BD13) && SM.STATE != IDLE)
+    if (DebounceButton(&SW1) && SM.STATE != IDLE)
     {
-      SM.STATE = STOP_PWM;
-      printf("STOP PWM\n");
+      SM_force_stop();
+      printf("SW1: STOP PWM\n");
     }
 
-    if (DebounceButton(&BD14) && SM.STATE == IDLE)
+    if (DebounceButton(&SW2) && SM.STATE == IDLE)
     {
       SM_add_task(&SM, START_PWM);
-      SM_add_task(&SM, TEST_PHASE);
-      printf("INICIO DEL PWM\n");
+      SM_add_task(&SM, TEST_SVM_SIGNALS);
+      printf("SW2: START PWM\n");
     }
 
-    if (DebounceButton(&BD15))
+    if (DebounceButton(&SW3))
     {
-      printf("BOTON D15\n");
+      printf("SW3:\n");
     }
 
     static int64_t last_tick = 0;
     int64_t current_tick = TIMER_TICK.full;
-    if (current_tick - last_tick >= ONE_MS_TICK * 100)
+    if (current_tick - last_tick >= ONE_MS_TICK * 10)
     {
       last_tick = current_tick;
 
-      printf("SM:%2d - encoder:%6.02f - Vbus:%7.03f - POT_A:%6.03f - POT_B:%6.03f - POT_C:%6.03f - I_A:%6.02f - I_B:%6.02f\n", SM.STATE, ENCODER.filter_global_theta.value, Vbus, POT_A, POT_B, POT_C, CURRENT.phase_A.filter.value, CURRENT.phase_B.filter.value);
+      // printf("SM:%2d - encoder:%6.02f - Vbus:%7.03f - POT_A:%6.03f - POT_B:%6.03f - POT_C:%6.03f - I_A:%6.02f - I_B:%6.02f\n", SM.STATE, ENCODER.filter_global_theta.value, Vbus, POT_A, POT_B, POT_C, CURRENT.phase_A.filter.value, CURRENT.phase_B.filter.value);
+      printf("SM:%2d\n", SM.STATE);
     }
 
 #ifdef EN_DEBUG
@@ -372,32 +381,36 @@ int main(void)
 }
 
 /**
-  * @brief System Clock Configuration
-  * @retval None
-  */
+ * @brief System Clock Configuration
+ * @retval None
+ */
 void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
   /** Supply configuration update enable
-  */
+   */
   HAL_PWREx_ConfigSupply(PWR_LDO_SUPPLY);
 
   /** Configure the main internal regulator output voltage
-  */
+   */
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-  while(!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {}
+  while (!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY))
+  {
+  }
 
   __HAL_RCC_SYSCFG_CLK_ENABLE();
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE0);
 
-  while(!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {}
+  while (!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY))
+  {
+  }
 
   /** Initializes the RCC Oscillators according to the specified parameters
-  * in the RCC_OscInitTypeDef structure.
-  */
+   * in the RCC_OscInitTypeDef structure.
+   */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
@@ -416,10 +429,8 @@ void SystemClock_Config(void)
   }
 
   /** Initializes the CPU, AHB and APB buses clocks
-  */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2
-                              |RCC_CLOCKTYPE_D3PCLK1|RCC_CLOCKTYPE_D1PCLK1;
+   */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2 | RCC_CLOCKTYPE_D3PCLK1 | RCC_CLOCKTYPE_D1PCLK1;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.SYSCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_HCLK_DIV2;
@@ -434,20 +445,20 @@ void SystemClock_Config(void)
   }
 
   /** Enables the Clock Security System
-  */
+   */
   HAL_RCC_EnableCSS();
 }
 
 /**
-  * @brief Peripherals Common Clock Configuration
-  * @retval None
-  */
+ * @brief Peripherals Common Clock Configuration
+ * @retval None
+ */
 void PeriphCommonClock_Config(void)
 {
   RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 
   /** Initializes the peripherals clock
-  */
+   */
   PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_ADC;
   PeriphClkInitStruct.PLL2.PLL2M = 2;
   PeriphClkInitStruct.PLL2.PLL2N = 72;
@@ -470,7 +481,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if (htim->Instance == TIM1)
   {
-    HAL_GPIO_WritePin(GPIOE, GPIO_PIN_3, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(LED_LOOP_GPIO_Port, LED_LOOP_Pin, GPIO_PIN_SET);
 
     uint16_t RAW_ENCODER_POS = htim3.Instance->CNT;
     uint32_t RAW_ENCODER_UPDATE_TICK = htim2.Instance->CCR2;
@@ -487,102 +498,110 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     update_ADC(&ADC_VBUS, ADC3_DMA[0]);
     Vbus = ADC_VBUS.filter_value.value;
 
-    update_ADC(&ADC_POT_A, ADC3_DMA[1]);
+    update_ADC(&ADC_POT_A, ADC2_DMA[0]);
     POT_A = ABS_min_constrain(ADC_POT_A.filter_value.value, 0.02f);
 
-    update_ADC(&ADC_POT_B, ADC3_DMA[2]);
+    update_ADC(&ADC_POT_B, ADC2_DMA[1]);
     POT_B = ABS_min_constrain(ADC_POT_B.filter_value.value, 0.02f);
 
-    update_ADC(&ADC_POT_C, ADC3_DMA[3]);
+    update_ADC(&ADC_POT_C, ADC2_DMA[2]);
     POT_C = ABS_min_constrain(ADC_POT_C.filter_value.value, 0.02f);
 
     uint16_t RAW_A = HAL_ADCEx_InjectedGetValue(&hadc1, ADC_INJECTED_RANK_1);
     uint16_t RAW_B = HAL_ADCEx_InjectedGetValue(&hadc1, ADC_INJECTED_RANK_2);
-    update_current_sensor(&CURRENT, RAW_A, RAW_B, ENCODER.electric_theta);
+    uint16_t RAW_C = HAL_ADCEx_InjectedGetValue(&hadc1, ADC_INJECTED_RANK_3);
+    update_current_sensor(&CURRENT, RAW_A, RAW_B, RAW_C, ENCODER.electric_theta);
     Ibus = CURRENT.filter_bus.value;
 
     // if((Vbus <= 10.0f || Ibus >= 20.0f) && (SVM_EN || PWM_EN)){
-    //   Stop_TIM1_PWM();
+    //   Disable_TIM1_PWM();
     // }
+
+    if (SM.STATE == IDLE && !SM_is_empty(&SM))
+    {
+      SM_update_task(&SM);
+    }
 
     static uint64_t UTIL_SM_TIME = 0;
     float Ta, Tb, Tc = 0.0f;
     switch (SM.STATE)
     {
     case IDLE:
-      if (!SM_is_empty(&SM))
-      {
-        SM_update_task(&SM);
-      }
-
       if (PWM_EN)
       {
-        Stop_TIM1_PWM();
+        SM_force_stop();
       }
       break;
 
     case START_PWM:
-      htim1.Instance->CCR1 = 0;
-      htim1.Instance->CCR2 = 0;
-      htim1.Instance->CCR3 = 0;
-
-      static bool start_trig = false;
-      static int start_iter_wait_count = 0;
-      if (!start_trig)
+    {
+      static bool start_flag = false;
+      static int start_wait_count = 0;
+      if (!start_flag)
       {
-        start_trig = true;
-        start_iter_wait_count = 0;
+        htim1.Instance->CCR1 = 0;
+        htim1.Instance->CCR2 = 0;
+        htim1.Instance->CCR3 = 0;
 
-        Start_TIM1_PWM();
+        Enable_TIM1_PWM();
+
+        start_flag = true;
+        start_wait_count = 10;
 
         PWM_EN = false;
         SVM_EN = false;
       }
       else
       {
-        if (start_iter_wait_count >= 5)
+        start_wait_count--;
+
+        if (start_wait_count <= 0)
         {
-          start_trig = false;
+          start_flag = false;
           PWM_EN = true;
           SM_update_task(&SM);
         }
-        else
+        else if (start_wait_count <= 2)
         {
-          start_iter_wait_count++;
+          HAL_GPIO_WritePin(EN_GATE_GPIO_Port, EN_GATE_Pin, GPIO_PIN_SET);
         }
       }
-
       break;
+    }
 
     case STOP_PWM:
-      htim1.Instance->CCR1 = 0;
-      htim1.Instance->CCR2 = 0;
-      htim1.Instance->CCR3 = 0;
-
-      static bool stop_trig = false;
-      static int stop_iter_wait_count = 0;
-      if (!stop_trig)
+    {
+      static bool stop_flag = false;
+      static int stop_wait_count = 0;
+      if (!stop_flag)
       {
-        stop_trig = true;
-        stop_iter_wait_count = 0;
+        htim1.Instance->CCR1 = 0;
+        htim1.Instance->CCR2 = 0;
+        htim1.Instance->CCR3 = 0;
+
+        stop_flag = true;
+        stop_wait_count = 10;
 
         PWM_EN = false;
         SVM_EN = false;
       }
       else
       {
-        if (stop_iter_wait_count >= 5)
+        stop_wait_count--;
+
+        if (stop_wait_count <= 0)
         {
-          stop_trig = false;
-          Stop_TIM1_PWM();
+          stop_flag = false;
+          Disable_TIM1_PWM();
           SM_update_task(&SM);
         }
-        else
+        else if (stop_wait_count <= 2)
         {
-          stop_iter_wait_count++;
+          HAL_GPIO_WritePin(EN_GATE_GPIO_Port, EN_GATE_Pin, GPIO_PIN_RESET);
         }
       }
       break;
+    }
 
     case START_SECUENCE:
       // SM_add_task(&SM, START_PWM);
@@ -603,11 +622,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         htim1.Instance->CCR3 = TIMER_PERIOD / 2;
       }
 
-      update_current_offset(&CURRENT, RAW_A, RAW_B, false);
+      update_current_offset(&CURRENT, RAW_A, RAW_B, RAW_C, false);
 
       if (TIMER_TICK.full - UTIL_SM_TIME >= ONE_MS_TICK * 100)
       {
-        update_current_offset(&CURRENT, RAW_A, RAW_B, true);
+        update_current_offset(&CURRENT, RAW_A, RAW_B, RAW_C, true);
         UTIL_SM_TIME = TIMER_TICK.full;
         SM_update_task(&SM);
       }
@@ -682,6 +701,18 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       SVM_theta += (SVM_DIR ? CALIB_ELECTRIC_SPEED : -CALIB_ELECTRIC_SPEED) * ((float)TIMER_IT_PERIOD / (float)TIMER_CLK);
       break;
     }
+    case TEST_SVM_SIGNALS:
+    {
+      SVM_theta = circular_constrain(SVM_theta + 0.1f);
+
+      SVM_Vq = 1.0f;
+      SVM_Vd = 0.0;
+
+      InverseParkAndSVM(SVM_Vd, SVM_Vq, 2.0, SVM_theta, &Ta, &Tb, &Tc);
+
+      break;
+    }
+
     case TEST_OPEN_LOOP:
     {
       int64_t dt = (TIMER_TICK.full + TIMER_IT_PERIOD * 3) - ENCODER.buffer[ENCODER.buffer_index].time;
@@ -730,8 +761,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       break;
 
     default:
-      Stop_TIM1_PWM();
-      SM_clear_task(&SM);
+      SM_force_stop();
       break;
     }
 
@@ -769,31 +799,24 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     }
 #endif
 
-    HAL_GPIO_WritePin(GPIOE, GPIO_PIN_3, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(LED_LOOP_GPIO_Port, LED_LOOP_Pin, GPIO_PIN_RESET);
   }
 }
 
-void Start_TIM1_PWM(void)
+void Enable_TIM1_PWM(void)
 {
-  htim1.Instance->CCR1 = 0;
-  htim1.Instance->CCR2 = 0;
-  htim1.Instance->CCR3 = 0;
-
   TIM1->CCER |= (TIM_CCER_CC1E | TIM_CCER_CC1NE | TIM_CCER_CC2E | TIM_CCER_CC2NE | TIM_CCER_CC3E | TIM_CCER_CC3NE);
-
-  PWM_EN = true;
 }
 
-void Stop_TIM1_PWM(void)
+void Disable_TIM1_PWM(void)
 {
-  htim1.Instance->CCR1 = 0;
-  htim1.Instance->CCR2 = 0;
-  htim1.Instance->CCR3 = 0;
-
   TIM1->CCER &= ~(TIM_CCER_CC1E | TIM_CCER_CC1NE | TIM_CCER_CC2E | TIM_CCER_CC2NE | TIM_CCER_CC3E | TIM_CCER_CC3NE);
+}
 
-  PWM_EN = false;
-  SVM_EN = false;
+void SM_force_stop()
+{
+  SM_clear_task(&SM);
+  SM.STATE = STOP_PWM;
 }
 
 int _write(int file, char *ptr, int len)
@@ -809,7 +832,7 @@ int _write(int file, char *ptr, int len)
 
 /* USER CODE END 4 */
 
- /* MPU Configuration */
+/* MPU Configuration */
 
 void MPU_Config(void)
 {
@@ -819,7 +842,7 @@ void MPU_Config(void)
   HAL_MPU_Disable();
 
   /** Initializes and configures the Region and the memory to be protected
-  */
+   */
   MPU_InitStruct.Enable = MPU_REGION_ENABLE;
   MPU_InitStruct.Number = MPU_REGION_NUMBER0;
   MPU_InitStruct.BaseAddress = 0x24000000;
@@ -835,7 +858,7 @@ void MPU_Config(void)
   HAL_MPU_ConfigRegion(&MPU_InitStruct);
 
   /** Initializes and configures the Region and the memory to be protected
-  */
+   */
   MPU_InitStruct.Number = MPU_REGION_NUMBER1;
   MPU_InitStruct.BaseAddress = 0x30000000;
   MPU_InitStruct.Size = MPU_REGION_SIZE_256KB;
@@ -844,7 +867,7 @@ void MPU_Config(void)
   HAL_MPU_ConfigRegion(&MPU_InitStruct);
 
   /** Initializes and configures the Region and the memory to be protected
-  */
+   */
   MPU_InitStruct.Number = MPU_REGION_NUMBER2;
   MPU_InitStruct.BaseAddress = 0x38000000;
   MPU_InitStruct.Size = MPU_REGION_SIZE_64KB;
@@ -852,7 +875,7 @@ void MPU_Config(void)
   HAL_MPU_ConfigRegion(&MPU_InitStruct);
 
   /** Initializes and configures the Region and the memory to be protected
-  */
+   */
   MPU_InitStruct.Number = MPU_REGION_NUMBER3;
   MPU_InitStruct.BaseAddress = 0x20000000;
   MPU_InitStruct.Size = MPU_REGION_SIZE_128KB;
@@ -863,13 +886,12 @@ void MPU_Config(void)
   HAL_MPU_ConfigRegion(&MPU_InitStruct);
   /* Enables the MPU */
   HAL_MPU_Enable(MPU_PRIVILEGED_DEFAULT);
-
 }
 
 /**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
+ * @brief  This function is executed in case of error occurrence.
+ * @retval None
+ */
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
@@ -881,14 +903,14 @@ void Error_Handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
+ * @brief  Reports the name of the source file and the source line number
+ *         where the assert_param error has occurred.
+ * @param  file: pointer to the source file name
+ * @param  line: assert_param error line source number
+ * @retval None
+ */
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */

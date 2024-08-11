@@ -10,7 +10,7 @@ typedef struct
     struct
     {
         int64_t time;
-        int32_t position;
+        int64_t position;
         float speed;
         float acceleration;
     } buffer[ENCODER_BUFFER_SIZE];
@@ -19,12 +19,12 @@ typedef struct
     tick_t UPDATE_TICK;
     tick_t INDEX_TICK;
 
-    int32_t RAW_VALUE;
-    int32_t last_RAW_VALUE;
-    int32_t RAW_BASE_POS;
+    int64_t RAW_VALUE;
+    int64_t last_RAW_VALUE;
+    int64_t RAW_BASE_POS;
 
-    int32_t RAW_POS;
-    int32_t RAW_theta;
+    int64_t RAW_POS;
+    int64_t RAW_theta;
 
     float OFFSET;
 

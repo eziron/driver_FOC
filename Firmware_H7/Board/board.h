@@ -52,6 +52,9 @@
 #define ADC_VPP (1.0 / (double)ADC_FULLSCALE)
 #define ADC_CTO (ADC_VREF * ADC_VPP)
 
+#define ADC2_DMA_SAMPLES 3
+#define ADC3_DMA_SAMPLES 3
+
 // parametros del SVM
 #define one_by_sqrt3 0.57735026919
 #define two_by_sqrt3 1.15470053838
