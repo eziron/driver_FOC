@@ -3,7 +3,8 @@
 
 #include "main.h"
 
-//#define EN_DEBUG
+#define EN_DEBUG
+#define SWAP_AC
 
 #define SM_BUFFER_LEN 32
 
@@ -26,14 +27,19 @@
 
 #define CURRENT_FILTER_CUT_FREC ((PHASE_RESISTENCE / PHASE_INDUCTANCE) * 2.0)
 
-#define CURRENT_P_GAIN (PHASE_RESISTENCE)
-#define CURRENT_I_GAIN ((PHASE_RESISTENCE * PHASE_RESISTENCE) / (PHASE_INDUCTANCE * (double)TIMER_IT_FREC))
+// #define CURRENT_P_GAIN (PHASE_RESISTENCE)
+// #define CURRENT_I_GAIN ((PHASE_RESISTENCE * PHASE_RESISTENCE) / (PHASE_INDUCTANCE * (double)TIMER_IT_FREC))
+
+#define CURRENT_P_GAIN 0.6f
+#define CURRENT_I_GAIN 0.03f
 
 // parametros del home
-//#define OFFSET_HOME 0.0280916048641791f
-#define OFFSET_HOME 0.0287740409361702f
+// #define OFFSET_HOME 0.0280916048641791f
+// #define OFFSET_HOME 0.0287740409361702f
+#define OFFSET_HOME 0.0695279223809524
+// #define OFFSET_HOME 0.0f
 
-#define CALIB_VOLTAGE_d 0.3f
+#define CALIB_VOLTAGE_d 0.6f
 #define CALIB_VOLTAGE_q 0.0f
 
 #define CALIB_SPEED 0.5f
@@ -42,11 +48,11 @@
 // parametros encoder
 #define ENCODER_PPR 2048                        // puntos por revolucion en resolucion x4
 #define ENCODER_TPP (1.0 / (double)ENCODER_PPR) // vueltas por punto
-#define ENCODER_BUFFER_SIZE 3
+#define ENCODER_BUFFER_SIZE 6
 #define ENCODER_MAX_TICK_DIFF (TIMER_CLK / 100) // 10ms en ticks
 
 // parametros ADC
-#define ADC_VREF 3.3475
+#define ADC_VREF 3.32
 #define ADC_RES 16
 #define ADC_FULLSCALE ((1u << ADC_RES) - 1u)
 #define ADC_VPP (1.0 / (double)ADC_FULLSCALE)
@@ -65,13 +71,14 @@
 #define DELTA_V_SET_MAX 0.2f // Máximo delta de V_set normalizado
 
 // parametros sensores de corriente
-#define SHURT_RESISTOR 0.005
+// #define SHURT_RESISTOR 0.0005
+#define SHURT_RESISTOR 0.001
 #define SHURT_GAIN 20.0
 #define SHURT_CTO (ADC_VREF / ((double)ADC_FULLSCALE * SHURT_RESISTOR * SHURT_GAIN))
 
 // parametros sensor de Vbus
-#define VBUS_R1 8200.0
-#define VBUS_R2 1000.0
+#define VBUS_R1 75000.0
+#define VBUS_R2 8200.0
 #define VBUS_CTO ((VBUS_R1 + VBUS_R2) / VBUS_R2)
 
 // atributos RAM

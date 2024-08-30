@@ -14,7 +14,7 @@
  * @return true Si los tiempos de activación son válidos.
  * @return false Si los tiempos de activación no son válidos.
  */
-bool SVM(float alpha, float beta, float *tA, float *tB, float *tC)
+bool SVMTransform(float alpha, float beta, float *tA, float *tB, float *tC)
 {
     int Sextant;
 
@@ -169,7 +169,7 @@ void InverseParkTransform(float d, float q, float theta, float *alpha, float *be
 }
 
 /**
- * @brief Realiza la transformación inversa de Park y la modulación por vector espacial (SVM).
+ * @brief Realiza la transformación inversa de Park y la modulación por vector espacial (SVMTransform).
  * 
  * @param Vd Componente d del voltaje.
  * @param Vq Componente q del voltaje.
@@ -181,10 +181,10 @@ void InverseParkTransform(float d, float q, float theta, float *alpha, float *be
  * @return true Si la transformación es válida.
  * @return false Si la transformación no es válida.
  */
-bool InverseParkAndSVM(float Vd, float Vq, float Vbus, float theta, float *tA, float *tB, float *tC)
+bool InverseParkAndSVM(SVM_data_t *SVM, float Vbus)
 {
-    float modVd = Vd / Vbus;
-    float modVq = Vq / Vbus;
+    float modVd = SVM->Vd / Vbus;
+    float modVq = SVM->Vq / Vbus;
 
     float modVdq = 0;
     arm_sqrt_f32((modVd * modVd) + (modVq * modVq), &modVdq);
@@ -196,9 +196,10 @@ bool InverseParkAndSVM(float Vd, float Vq, float Vbus, float theta, float *tA, f
         modVq *= scalingFactor;
     }
 
-    float alpha, beta;
-    InverseParkTransform(modVd, modVq, theta, &alpha, &beta);
-    return SVM(alpha, beta, tA, tB, tC);
+    SVM->Vdq = modVdq * Vbus;
+
+    InverseParkTransform(modVd, modVq, SVM->theta, &SVM->alpha, &SVM->beta);
+    return SVMTransform(SVM->alpha, SVM->beta, &SVM->tA, &SVM->tB, &SVM->tC);
 }
 
 /**
@@ -217,7 +218,6 @@ void ParkTransform(float alpha, float beta, float theta, float *d, float *q)
     float sin_value;
     float cos_value;
 
-    //arm_sin_cos_f32((theta * 360.0f)+60.0f, &sin_value, &cos_value);
     sin_value = arm_sin_f32(rad_theta);
     cos_value = arm_cos_f32(rad_theta);
 
@@ -225,7 +225,7 @@ void ParkTransform(float alpha, float beta, float theta, float *d, float *q)
     *d = -((alpha * cos_value) + (beta * sin_value));
 
     /* Calculate pIq using the equation, pIq = - Ialpha * sinVal + Ibeta * cosVal */
-    *q = -((-alpha * sin_value) + (beta * cos_value));
+    *q = -((beta * cos_value) - (alpha * sin_value));
 }
 
 /**

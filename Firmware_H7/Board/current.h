@@ -40,8 +40,8 @@ typedef struct
     filter_t filter_bus;
 } CurrentSystem;
 
-void update_current_offset(CurrentSystem *data, int32_t ADC_RAW_A, int32_t ADC_RAW_B, int32_t ADC_RAW_C, bool set);
+void update_current_offset(CurrentSystem *data, int32_t ADC_RAW_A, int32_t ADC_RAW_B, bool set);
 void update_current_phase_sensor(Phase_current_data_t *phase_data, int32_t ADC_RAW);
-void update_current_sensor(CurrentSystem *current, int32_t ADC_RAW_A, int32_t ADC_RAW_B, int32_t ADC_RAW_C, float electric_theta);
+void update_current_sensor(CurrentSystem *current, int32_t ADC_RAW_A, int32_t ADC_RAW_B, float electric_theta);
 
 #endif // CURRENT_H

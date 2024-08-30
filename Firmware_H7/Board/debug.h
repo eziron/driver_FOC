@@ -11,108 +11,172 @@
 #include "current.h"
 #include "encoder.h"
 #include "PID.h"
+#include "FOC.h"
 
 #ifdef EN_DEBUG
 
 #define EN_DEBUG_ENCODER
 #define EN_DEBUG_CURRENT
-#define EN_DEBUG_VBUS
+//#define EN_DEBUG_CONTROLLER
 #define EN_DEBUG_SVM
-#define EN_DEBUG_EXTRA
+#define DEBUG_VBUS
 
 // variables del encoder
 #ifdef EN_DEBUG_ENCODER
-#define DEBUG_ENCODER_RAW_GLOBAL_THETA
-#define DEBUG_ENCODER_RAW_THETA
-
 #define DEBUG_ENCODER_GLOBAL_THETA
-#define DEBUG_ENCODER_THETA
 #define DEBUG_ENCODER_SPEED
-#define DEBUG_ENCODER_ACCELERATION
-
-#define DEBUG_ENCODER_FILTER_GLOBAL_THETA
-#define DEBUG_ENCODER_FILTER_SPEED
-#define DEBUG_ENCODER_FILTER_ACCELERATION
-
-#define DEBUG_ENCODER_ELECTRIC_SPEED
+//#define DEBUG_ENCODER_ACCELERATION
 #define DEBUG_ENCODER_ELECTRIC_THETA
 #endif
 
 // variables del sensor de corriente
 #ifdef EN_DEBUG_CURRENT
-#define DEBUG_IA
-#define DEBUG_IB
-#define DEBUG_IC
-#define DEBUG_IALPHA
-#define DEBUG_IBETA
-#define DEBUG_ID
-#define DEBUG_IQ
-#define DEBUG_IBUS
-
-#define DEBUG_FILTER_IA
-#define DEBUG_FILTER_IB
-#define DEBUG_FILTER_IC
-#define DEBUG_FILTER_IALPHA
-#define DEBUG_FILTER_IBETA
-#define DEBUG_FILTER_ID
-#define DEBUG_FILTER_IQ
-#define DEBUG_FILTER_IBUS
+#define DEBUG_CURRENT_IA
+#define DEBUG_CURRENT_IB
+#define DEBUG_CURRENT_IC
+#define DEBUG_CURRENT_IALPHA
+#define DEBUG_CURRENT_IBETA
+#define DEBUG_CURRENT_ID
+#define DEBUG_CURRENT_IQ
 #endif
 
-// variables voltaje de bus
-#ifdef EN_DEBUG_VBUS
-#define DEBUG_VBUS
-#define DEBUG_FILTER_VBUS
+// variables del controlador de corriente
+#ifdef EN_DEBUG_CONTROLLER
+#define DEBUG_CONTROLLER_IQ_SET 
+#define DEBUG_CONTROLLER_ID_SET 
+#define DEBUG_CONTROLLER_VID    
+#define DEBUG_CONTROLLER_VIQ    
+#define DEBUG_CONTROLLER_VD     
+#define DEBUG_CONTROLLER_VQ     
 #endif
 
 // variables del SVM
 #ifdef EN_DEBUG_SVM
-#define DEBUG_SVM_VQ
 #define DEBUG_SVM_VD
+#define DEBUG_SVM_VQ
+#define DEBUG_SVM_VDQ
+#define DEBUG_SVM_THETA
+#define DEBUG_SVM_ALPHA
+#define DEBUG_SVM_BETA
 #define DEBUG_SVM_TA
 #define DEBUG_SVM_TB
 #define DEBUG_SVM_TC
-#define DEBUG_SVM_TIM_TA
-#define DEBUG_SVM_TIM_TB
-#define DEBUG_SVM_TIM_TC
-#endif
-
-// extra
-#ifdef EN_DEBUG_EXTRA
-#define DEBUG_POT_A
-#define DEBUG_POT_B
-#define DEBUG_POT_C
 #endif
 
 typedef struct
 {
     uint32_t time_tick;
 
-    //float Vbus;
-
+#ifdef DEBUG_ENCODER_GLOBAL_THETA
     float theta;
+#endif
+
+#ifdef DEBUG_ENCODER_SPEED
     float speed;
-    //float acc;
+#endif
+
+#ifdef DEBUG_ENCODER_ACCELERATION
+    float acceleration;
+#endif
+
+#ifdef DEBUG_ENCODER_ELECTRIC_THETA
     float el_theta;
+#endif
 
+#ifdef DEBUG_CONTROLLER_IQ_SET
     float Iq_set;
+#endif
 
+#ifdef DEBUG_CONTROLLER_ID_SET
+    float Id_set;
+#endif
+
+#ifdef DEBUG_CONTROLLER_VID
     float Vid;
+#endif
+
+#ifdef DEBUG_CONTROLLER_VIQ
     float Viq;
+#endif
 
+#ifdef DEBUG_CONTROLLER_VD
     float Vd;
+#endif
+
+#ifdef DEBUG_CONTROLLER_VQ
     float Vq;
+#endif
 
+#ifdef DEBUG_CURRENT_IA
     float Ia;
+#endif
+
+#ifdef DEBUG_CURRENT_IB
     float Ib;
+#endif
+
+#ifdef DEBUG_CURRENT_IC
     float Ic;
+#endif
 
-    //float Ialpha;
-    //float Ibeta;
+#ifdef DEBUG_CURRENT_IALPHA
+    float Ialpha;
+#endif
 
+#ifdef DEBUG_CURRENT_IBETA
+    float Ibeta;
+#endif
+
+#ifdef DEBUG_CURRENT_ID
     float Id;
+#endif
+
+#ifdef DEBUG_CURRENT_IQ
     float Iq;
+#endif
+
+#ifdef DEBUG_VBUS
+    float Vbus;
+#endif
+
+#ifdef DEBUG_SVM_VD
+    float SVM_Vd;
+#endif
+
+#ifdef DEBUG_SVM_VQ
+    float SVM_Vq;
+#endif
+
+#ifdef DEBUG_SVM_VDQ
+    float SVM_Vdq;
+#endif
+
+#ifdef DEBUG_SVM_THETA
+    float SVM_theta;
+#endif
+
+#ifdef DEBUG_SVM_ALPHA
+    float SVM_alpha;
+#endif
+
+#ifdef DEBUG_SVM_BETA
+    float SVM_beta;
+#endif
+
+#ifdef DEBUG_SVM_TA
+    float SVM_tA;
+#endif
+
+#ifdef DEBUG_SVM_TB
+    float SVM_tB;
+#endif
+
+#ifdef DEBUG_SVM_TC
+    float SVM_tC;
+#endif
+
 } debug_buffer_data_t;
+
 
 #define DEBUG_DATA_SIZE sizeof(debug_buffer_data_t)
 
@@ -123,7 +187,7 @@ typedef union
 } debug_buffer_data_split;
 
 // para ajustar el tamaño del buffer a la capacidad de la RAM D1
-#define DEBUG_DATA_LEN ((524288 / DEBUG_DATA_SIZE) - 50)
+#define DEBUG_DATA_LEN ((524288 / DEBUG_DATA_SIZE) - 20)
 
 typedef struct
 {
@@ -143,10 +207,11 @@ void send_debug_data(debug_data_t *debug_data);
 
 void add_debug_data(
     debug_data_t *debug_data,
-    tick_data *timer_tick,
+    tick_t *timer_tick,
     EncoderSystem *encoder_data,
     CurrentSystem *current_data,
-    ControllerDQSystem_t *controller_data,
+    ControllerDQ_t *controller_data,
+    SVM_data_t *svm_data,
     float *vbus);
 
 #endif

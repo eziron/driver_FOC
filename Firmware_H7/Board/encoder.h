@@ -41,7 +41,8 @@ typedef struct
 
 } EncoderSystem;
 
+void update_index_offset(EncoderSystem *encoder);
 void update_encoder_offset(EncoderSystem *encoder, float SVM_theta, int SVM_DIR, bool set);
-void update_encoder(EncoderSystem *encoder, uint16_t raw_encoder_pos,int64_t global_tick);
+void update_encoder(EncoderSystem *encoder, uint16_t raw_encoder_pos, int64_t global_tick);
 
 #endif // ENC_H

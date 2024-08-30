@@ -1,12 +1,17 @@
 #include "encoder.h"
 
+void update_index_offset(EncoderSystem *encoder)
+{
+    encoder->RAW_BASE_POS -= encoder->RAW_POS;
+}
+
 void update_encoder_offset(EncoderSystem *encoder, float SVM_theta, int SVM_DIR, bool set)
 {
     static double OFFSET_UP_SUM = 0.0;
-    static uint32_t OFFSET_UP_count = 0;
+    static int32_t OFFSET_UP_count = 0;
 
     static double OFFSET_DOWN_SUM = 0.0;
-    static uint32_t OFFSET_DOWN_count = 0;
+    static int32_t OFFSET_DOWN_count = 0;
 
     if (set)
     {
@@ -89,7 +94,7 @@ void update_encoder(EncoderSystem *encoder, uint16_t raw_encoder_pos, int64_t gl
         }
         else
         {
-            int32_t encoder_delta_pos = encoder->buffer[encoder->buffer_index].position - encoder->buffer[firstIndex].position;
+            int64_t encoder_delta_pos = encoder->buffer[encoder->buffer_index].position - encoder->buffer[firstIndex].position;
             int64_t encoder_delta_time = encoder->buffer[encoder->buffer_index].time - encoder->buffer[firstIndex].time;
 
             if (encoder_delta_time == 0 || encoder_delta_pos == 0)

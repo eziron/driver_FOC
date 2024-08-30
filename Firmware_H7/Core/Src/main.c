@@ -75,6 +75,8 @@ CurrentSystem CURRENT = {0};
 ControllerDQ_t CURRENT_CONTROLLER = {0};
 float Ibus;
 
+SVM_data_t SVM = {0};
+
 uint16_t ADC2_DMA[ADC2_DMA_SAMPLES] __ATTR_RAM_D2 = {0};
 uint16_t ADC3_DMA[ADC3_DMA_SAMPLES] __ATTR_RAM_D3 = {0};
 
@@ -95,13 +97,6 @@ ButtonDebounce_t SW2 = {0};
 ButtonDebounce_t SW3 = {0};
 
 bool PWM_EN = false;
-bool SVM_EN = false;
-
-int SVM_DIR = 0;
-float SVM_theta = 0.0f;
-
-float SVM_Vq = 0.0f;
-float SVM_Vd = 0.0f;
 
 #ifdef EN_DEBUG
 debug_data_t debug_data __ATTR_RAM_D1 = {0};
@@ -113,6 +108,7 @@ void SystemClock_Config(void);
 void PeriphCommonClock_Config(void);
 static void MPU_Config(void);
 /* USER CODE BEGIN PFP */
+bool InRange(float value);
 void Enable_TIM1_PWM(void);
 void Disable_TIM1_PWM(void);
 void SM_force_stop(void);
@@ -190,9 +186,9 @@ int main(void)
   setup_ADC(&ADC_POT_B, 2.0f, 0.5f, 10.0f);
   setup_ADC(&ADC_POT_C, 2.0f, 0.5f, 10.0f);
 
-  calculate_alpha((float)TIMER_IT_FREC, 1000.0f, &ENCODER.filter_global_theta);
-  calculate_alpha((float)TIMER_IT_FREC, 1000.0f, &ENCODER.filter_speed);
-  calculate_alpha((float)TIMER_IT_FREC, 1000.0f, &ENCODER.filter_acceleration);
+  calculate_alpha((float)TIMER_IT_FREC, 8000.0f, &ENCODER.filter_global_theta);
+  calculate_alpha((float)TIMER_IT_FREC, 8000.0f, &ENCODER.filter_speed);
+  calculate_alpha((float)TIMER_IT_FREC, 8000.0f, &ENCODER.filter_acceleration);
 
   calculate_alpha((float)TIMER_IT_FREC, (float)CURRENT_FILTER_CUT_FREC, &CURRENT.phase_A.filter);
   calculate_alpha((float)TIMER_IT_FREC, (float)CURRENT_FILTER_CUT_FREC, &CURRENT.phase_B.filter);
@@ -204,7 +200,7 @@ int main(void)
   calculate_alpha((float)TIMER_IT_FREC, (float)CURRENT_FILTER_CUT_FREC, &CURRENT.filter_d);
   calculate_alpha((float)TIMER_IT_FREC, (float)CURRENT_FILTER_CUT_FREC, &CURRENT.filter_q);
 
-  calculate_alpha((float)TIMER_IT_FREC, 1000.0f, &CURRENT.filter_bus);
+  calculate_alpha((float)TIMER_IT_FREC, 8000.0f, &CURRENT.filter_bus);
 
   SetupControllerDQ(&CURRENT_CONTROLLER, CURRENT_P_GAIN, CURRENT_I_GAIN);
 
@@ -253,6 +249,10 @@ int main(void)
 
 #ifdef EN_DEBUG
   printf("Debug Buffer len: %u\n", DEBUG_DATA_LEN);
+  printf("Debug Data Size: %u\n", DEBUG_DATA_SIZE);
+  printf("Packet Size: %u\n", PACKET_SIZE);
+  debug_data.EN_write = false;
+  debug_data.EN_read = false;
 #endif
 
   HAL_Delay(1000);
@@ -260,60 +260,16 @@ int main(void)
   // printf("P_GAIN: %.10lf\n", CURRENT_P_GAIN);
   // printf("I_GAIN: %.10lf\n\n", CURRENT_I_GAIN);
   // printf("iniciando calibracion del motor...\n");
-  //  HAL_Delay(1000);
-
-  // SM_add_task(&SM, START_SECUENCE);
-  // HAL_Delay(1);
-  // SM_wait_IDLE(&SM);
-  // HAL_Delay(1);
-
-  // printf("OFFSET_IA: %ld / OFFSET_IB: %ld / Vbus: %.8f\n", CURRENT.phase_A.OFFSET, CURRENT.phase_B.OFFSET, Vbus);
-
-  // SM_add_task(&SM, CALIB_SECUENCE);
-  // HAL_Delay(1);
-  // SM_wait_IDLE(&SM);
-
-  // HAL_Delay(100);
-  // printf("Encoder OFFSET: %.9f\n", ENCODER.OFFSET);
-  // HAL_Delay(5000);
-  // printf("activando motor...\n");
   // HAL_Delay(1000);
-  // SM_add_task(&SM, START_PWM);
-  // SM_add_task(&SM, TEST_OPEN_LOOP);
-  //  SM_add_task(&SM, TEST_CLOSE_LOOP);
 
-  // SVM_EN = true;
-
-#ifndef OFFSET_HOME
-  for (int i = 0; i < 50; i++)
-  {
-    SVM_DIR = 1;
-    ENCODER.OFFSET = 0.0f;
-    STATE = OFFSET_CALIB;
-
-    while (STATE != IDLE)
-    {
-      HAL_Delay(10);
-    }
-
-    printf("Encoder OFFSET: %.9f\n", ENCODER.OFFSET);
-  }
-#endif
-
-#ifdef EN_DEBUG
-  for (int i = 0; i < 25; i++)
-  {
-    printf("speed:%7.2f, Id_set:%6.2f, Vd:%6.2f, Id:%6.2f, Iq_set:%6.2f, Vq:%6.2f, Iq:%6.2f\n", ENCODER.filter_speed.value, CURRENT_CONTROLLER.d.set_point, SVM_Vd, CURRENT.filter_d.value, CURRENT_CONTROLLER.q.set_point, SVM_Vq, CURRENT.filter_q.value);
-    HAL_Delay(200);
-  }
-  printf("activando debug...\n");
-  HAL_Delay(1000);
-  debug_data.first_index = 0;
-  debug_data.last_index = 0;
-  debug_data.EN_write = true;
+  SM_add_task(&SM, START_SECUENCE);
   HAL_Delay(1);
-  debug_data.EN_read = true;
-#endif
+  SM_wait_IDLE(&SM);
+  HAL_Delay(1);
+
+  printf("OFFSET_IA: %ld / OFFSET_IB: %ld / OFFSET_IC: %ld / Vbus: %.8f\n", CURRENT.phase_A.OFFSET, CURRENT.phase_B.OFFSET, CURRENT.phase_C.OFFSET, Vbus);
+  HAL_Delay(5000);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -327,26 +283,45 @@ int main(void)
       printf("SW1: STOP PWM\n");
     }
 
-    if (DebounceButton(&SW2) && SM.STATE == IDLE)
+    if (DebounceButton(&SW2))
     {
-      SM_add_task(&SM, START_PWM);
-      SM_add_task(&SM, TEST_SVM_SIGNALS);
-      printf("SW2: START PWM\n");
+      if (SM.STATE == IDLE)
+      {
+        SM_add_task(&SM, START_PWM);
+
+        // SM_add_task(&SM, TEST_SVM_SIGNALS);
+        // SM_add_task(&SM, TEST_PHASE);
+        // SM_add_task(&SM, TEST_OPEN_LOOP);
+        SM_add_task(&SM, TEST_ENCODER_OPEN_LOOP);
+        // SM_add_task(&SM, TEST_CLOSE_LOOP);
+
+        printf("SW2: START PWM\n");
+      }
+      else
+      {
+#ifdef EN_DEBUG
+        if (!debug_data.EN_write && !debug_data.EN_read)
+        {
+          printf("activando debug...\n");
+          HAL_Delay(100);
+          debug_data.first_index = 0;
+          debug_data.last_index = 0;
+          debug_data.EN_write = true;
+          HAL_Delay(1);
+          debug_data.EN_read = true;
+        }
+#endif
+      }
     }
 
     if (DebounceButton(&SW3))
     {
-      printf("SW3:\n");
-    }
-
-    static int64_t last_tick = 0;
-    int64_t current_tick = TIMER_TICK.full;
-    if (current_tick - last_tick >= ONE_MS_TICK * 10)
-    {
-      last_tick = current_tick;
-
-      // printf("SM:%2d - encoder:%6.02f - Vbus:%7.03f - POT_A:%6.03f - POT_B:%6.03f - POT_C:%6.03f - I_A:%6.02f - I_B:%6.02f\n", SM.STATE, ENCODER.filter_global_theta.value, Vbus, POT_A, POT_B, POT_C, CURRENT.phase_A.filter.value, CURRENT.phase_B.filter.value);
-      printf("SM:%2d\n", SM.STATE);
+      SM_add_task(&SM, CALIB_SECUENCE);
+      HAL_Delay(1);
+      SM_wait_IDLE(&SM);
+      HAL_Delay(100);
+      printf("Encoder OFFSET: %.9f - Index OFFSER:%ld\n", ENCODER.OFFSET, (int32_t)ENCODER.RAW_BASE_POS);
+      // HAL_Delay(5000);
     }
 
 #ifdef EN_DEBUG
@@ -366,10 +341,17 @@ int main(void)
     else
     {
 #endif
-      // printf("speed:%7.2f, Id_set:%6.2f, Vd:%6.2f, Id:%6.2f, Iq_set:%6.2f, Vq:%6.2f, Iq:%6.2f\n", ENCODER.filter_speed.value, CURRENT_CONTROLLER.d.set_point, SVM_Vd, CURRENT.filter_d.value, CURRENT_CONTROLLER.q.set_point, SVM_Vq, CURRENT.filter_q.value);
-      //  printf("speed:%7.f, Vd:%6.2f, Id:%6.2f, Vq:%6.2f, Iq:%6.2f\n", ENCODER.filter_speed.value*60.0f, SVM_Vd, CURRENT.filter_d.value, SVM_Vq, CURRENT.filter_q.value);
-      //    printf("POT_A:%7.2f, POT_B:%6.2f\n",(POT_A - 0.5f) * 2.0f,(POT_B - 0.5f)*2.0f);
-      // HAL_Delay(10);
+      static int64_t last_tick = 0;
+      int64_t current_tick = TIMER_TICK.full;
+      if (current_tick - last_tick >= ONE_MS_TICK * 100)
+      {
+        last_tick = current_tick;
+
+        // printf("SM:%2d - encoder:%6.02f - Vbus:%7.03f - POT_A:%6.03f - POT_B:%6.03f - POT_C:%6.03f - I_A:%6.02f - I_B:%6.02f\n", SM.STATE, ENCODER.filter_global_theta.value, Vbus, POT_A, POT_B, POT_C, CURRENT.phase_A.filter.value, CURRENT.phase_B.filter.value);
+        // printf("SM:%2d\n", SM.STATE);
+
+        printf("Vbus:%8.03f - I_A:%8.03f - I_B:%8.03f - I_C:%8.03f - encoder:%8.05f - speed:%8.05f - POT_A:%8.03f - POT_B:%8.03f - POT_C:%8.03f\n", Vbus, CURRENT.phase_A.filter.value, CURRENT.phase_B.filter.value, CURRENT.phase_C.filter.value, ENCODER.filter_global_theta.value, ENCODER.speed, POT_A, POT_B, POT_C);
+      }
 #ifdef EN_DEBUG
     }
 #endif
@@ -509,13 +491,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
     uint16_t RAW_A = HAL_ADCEx_InjectedGetValue(&hadc1, ADC_INJECTED_RANK_1);
     uint16_t RAW_B = HAL_ADCEx_InjectedGetValue(&hadc1, ADC_INJECTED_RANK_2);
-    uint16_t RAW_C = HAL_ADCEx_InjectedGetValue(&hadc1, ADC_INJECTED_RANK_3);
-    update_current_sensor(&CURRENT, RAW_A, RAW_B, RAW_C, ENCODER.electric_theta);
+    update_current_sensor(&CURRENT, RAW_A, RAW_B, ENCODER.electric_theta);
     Ibus = CURRENT.filter_bus.value;
 
-    // if((Vbus <= 10.0f || Ibus >= 20.0f) && (SVM_EN || PWM_EN)){
-    //   Disable_TIM1_PWM();
-    // }
+    if ((Vbus <= 10.0f) && (SVM.EN || PWM_EN))
+    {
+      SM_force_stop();
+    }
 
     if (SM.STATE == IDLE && !SM_is_empty(&SM))
     {
@@ -523,7 +505,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     }
 
     static uint64_t UTIL_SM_TIME = 0;
-    float Ta, Tb, Tc = 0.0f;
     switch (SM.STATE)
     {
     case IDLE:
@@ -549,7 +530,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         start_wait_count = 10;
 
         PWM_EN = false;
-        SVM_EN = false;
+        SVM.EN = false;
       }
       else
       {
@@ -583,7 +564,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         stop_wait_count = 10;
 
         PWM_EN = false;
-        SVM_EN = false;
+        SVM.EN = false;
       }
       else
       {
@@ -614,19 +595,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       break;
 
     case ADC_OFFSET_CALIB:
-
-      if (PWM_EN)
-      {
-        htim1.Instance->CCR1 = TIMER_PERIOD / 2;
-        htim1.Instance->CCR2 = TIMER_PERIOD / 2;
-        htim1.Instance->CCR3 = TIMER_PERIOD / 2;
-      }
-
-      update_current_offset(&CURRENT, RAW_A, RAW_B, RAW_C, false);
+      update_current_offset(&CURRENT, RAW_A, RAW_B, false);
 
       if (TIMER_TICK.full - UTIL_SM_TIME >= ONE_MS_TICK * 100)
       {
-        update_current_offset(&CURRENT, RAW_A, RAW_B, RAW_C, true);
+        update_current_offset(&CURRENT, RAW_A, RAW_B, true);
         UTIL_SM_TIME = TIMER_TICK.full;
         SM_update_task(&SM);
       }
@@ -638,15 +611,20 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 #ifndef OFFSET_HOME
       SM_add_task(&SM, OFFSET_CALIB);
+      ENCODER.OFFSET = 0.0f;
 #endif
 
       SM_add_task(&SM, STOP_PWM);
 
-      SVM_Vq = 0.0f;
-      SVM_Vd = 0.0f;
-      SVM_theta = 0.0f;
-      SVM_DIR = 1;
-      SVM_EN = true;
+      SVM.Vq = 0.0f;
+      SVM.Vd = 0.0f;
+      SVM.DIR = 1;
+      SVM.EN = false;
+
+      if (ENCODER.OFFSET == 0.0f)
+        SVM.theta = 0.0f;
+      else
+        SVM.theta = ENCODER.electric_theta;
 
       UTIL_SM_TIME = TIMER_TICK.full;
 
@@ -654,127 +632,157 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       break;
 
     case GO_INDEX:
-      SVM_Vq = CALIB_VOLTAGE_q;
-      SVM_Vd = CALIB_VOLTAGE_d;
+      SVM.EN = true;
+      SVM.Vq = CALIB_VOLTAGE_q;
+      SVM.Vd = CALIB_VOLTAGE_d;
       if (index_is_update)
       {
-        ENCODER.RAW_BASE_POS -= RAW_ENCODER_POS;
+        update_index_offset(&ENCODER);
 
         UTIL_SM_TIME = TIMER_TICK.full;
 
 #ifdef OFFSET_HOME
         ENCODER.OFFSET = OFFSET_HOME;
 #else
-        SVM_theta = 0.0f;
-        SVM_DIR = 1;
+        SVM.theta = 0.0f;
+        SVM.DIR = 1;
 #endif
 
         SM_update_task(&SM);
       }
       else
       {
-        SVM_theta += CALIB_ELECTRIC_SPEED * ((float)TIMER_IT_PERIOD / (float)TIMER_CLK);
+        SVM.theta += CALIB_ELECTRIC_SPEED * (float)TIMER_IT_PERIOD * TIMER_TIME_PERIOD;
       }
       break;
 
     case OFFSET_CALIB:
     {
-      if (encoder_is_update && ((SVM_DIR && ENCODER.speed > 0.0 && ENCODER.speed < CALIB_SPEED * 2.5f) || (!SVM_DIR && ENCODER.speed < 0.0 && ENCODER.speed > -CALIB_SPEED * 2.5f)))
+      if (encoder_is_update && ((SVM.DIR && ENCODER.speed > 0.0 && ENCODER.speed < CALIB_SPEED * 2.5f) || (!SVM.DIR && ENCODER.speed < 0.0 && ENCODER.speed > -CALIB_SPEED * 2.5f)))
       {
-        update_encoder_offset(&ENCODER, SVM_theta, SVM_DIR, false);
+        update_encoder_offset(&ENCODER, SVM.theta, SVM.DIR, false);
       }
 
-      if (SVM_DIR && ENCODER.global_theta >= 1.0f)
+      if (SVM.DIR && ENCODER.global_theta >= 1.0f)
       {
-        SVM_DIR = 0;
+        SVM.DIR = 0;
       }
-      else if (!SVM_DIR && ENCODER.global_theta <= 0.0f)
+      else if (!SVM.DIR && ENCODER.global_theta <= 0.0f)
       {
-        update_encoder_offset(&ENCODER, SVM_theta, SVM_DIR, true);
+        update_encoder_offset(&ENCODER, SVM.theta, SVM.DIR, true);
         SM_update_task(&SM);
       }
 
-      // SVM_Vq = (SVM_DIR ? 0.4f : -0.4f);
-      SVM_Vq = CALIB_VOLTAGE_q;
-      SVM_Vd = CALIB_VOLTAGE_d;
+      SVM.EN = true;
+      SVM.Vq = CALIB_VOLTAGE_q;
+      SVM.Vd = CALIB_VOLTAGE_d;
 
-      SVM_theta += (SVM_DIR ? CALIB_ELECTRIC_SPEED : -CALIB_ELECTRIC_SPEED) * ((float)TIMER_IT_PERIOD / (float)TIMER_CLK);
+      SVM.theta += (SVM.DIR ? CALIB_ELECTRIC_SPEED : -CALIB_ELECTRIC_SPEED) * (float)TIMER_IT_PERIOD * TIMER_TIME_PERIOD;
       break;
     }
     case TEST_SVM_SIGNALS:
     {
-      SVM_theta = circular_constrain(SVM_theta + 0.1f);
+      SVM.theta = circular_constrain(SVM.theta + 0.1f);
 
-      SVM_Vq = 1.0f;
-      SVM_Vd = 0.0;
+      SVM.Vq = 1.0f;
+      SVM.Vd = 0.0;
 
-      InverseParkAndSVM(SVM_Vd, SVM_Vq, 2.0, SVM_theta, &Ta, &Tb, &Tc);
+      InverseParkAndSVM(&SVM, 2.0);
 
       break;
     }
 
+    case TEST_PHASE:
+      SVM.EN = false;
+      SVM.tA = 0.5f;
+      SVM.tB = 0.5f;
+      SVM.tC = 0.5f;
+
+      float set_V = POT_A;
+      float set_time = (set_V / Vbus) / 2.0f;
+      // float set_time = POT_A / 2.0f;
+
+      SVM.tA -= set_time;
+      SVM.tB += set_time;
+      SVM.tC -= set_time;
+      break;
+
     case TEST_OPEN_LOOP:
     {
+      SVM.EN = true;
+
+      float dt_time = (float)TIMER_IT_PERIOD * TIMER_TIME_PERIOD;
+      SVM.theta += (POT_C * 10.0 * dt_time) * (float)MOTOR_POLE_PAIR;
+      SVM.theta = circular_constrain(SVM.theta);
+
+      SVM.Vq = POT_A * Vbus * 0.25;
+      SVM.Vd = POT_B * Vbus * 0.25;
+
+      break;
+    }
+
+    case TEST_ENCODER_OPEN_LOOP:
+    {
+      SVM.EN = true;
+
       int64_t dt = (TIMER_TICK.full + TIMER_IT_PERIOD * 3) - ENCODER.buffer[ENCODER.buffer_index].time;
       float dt_time = (float)dt * TIMER_TIME_PERIOD;
-      SVM_theta = (ENCODER.theta + (ENCODER.speed * dt_time)) * (float)MOTOR_POLE_PAIR;
-      SVM_theta = circular_constrain(SVM_theta);
+      SVM.theta = (ENCODER.theta + (ENCODER.speed * dt_time)) * (float)MOTOR_POLE_PAIR;
+      SVM.theta = circular_constrain(SVM.theta);
 
-      SVM_Vq = POT_A * 6.0;
-      SVM_Vd = POT_B * 2.0;
+      SVM.Vq = POT_A * Vbus * MAX_V_MOD;
+      SVM.Vd = POT_B * 2.0;
 
       break;
     }
     case TEST_CLOSE_LOOP:
     {
+      SVM.EN = true;
+
       UpdateControllerDQ(&CURRENT_CONTROLLER, &CURRENT, POT_B, POT_A, Vbus);
 
       if ((CURRENT_CONTROLLER.q.set_point > 0.0f && ENCODER.speed > 0.0f) || (CURRENT_CONTROLLER.q.set_point < 0.0f && ENCODER.speed < 0.0f))
       {
         int64_t dt = (TIMER_TICK.full + TIMER_IT_PERIOD * 3) - ENCODER.buffer[ENCODER.buffer_index].time;
         float dt_time = (float)dt * TIMER_TIME_PERIOD;
-        SVM_theta = (ENCODER.theta + (ENCODER.speed * dt_time)) * (float)MOTOR_POLE_PAIR;
+        SVM.theta = (ENCODER.theta + (ENCODER.speed * dt_time)) * (float)MOTOR_POLE_PAIR;
       }
       else
       {
-        SVM_theta = ENCODER.theta * (float)MOTOR_POLE_PAIR;
+        SVM.theta = ENCODER.theta * (float)MOTOR_POLE_PAIR;
       }
 
-      SVM_theta = circular_constrain(SVM_theta);
+      SVM.theta = circular_constrain(SVM.theta);
 
-      SVM_Vd = ABS_max_constrain(CURRENT_CONTROLLER.d.output, 6.0f);
-      SVM_Vq = ABS_max_constrain(CURRENT_CONTROLLER.q.output, 6.0f);
+      SVM.Vd = ABS_max_constrain(CURRENT_CONTROLLER.d.output, Vbus * MAX_V_MOD);
+      SVM.Vq = ABS_max_constrain(CURRENT_CONTROLLER.q.output, Vbus * MAX_V_MOD);
       break;
     }
-    case TEST_PHASE:
-      Ta = 0.5f;
-      Tb = 0.5f;
-      Tc = 0.5f;
-
-      // float set_V = POT_A;
-      //  float set_time = (set_V / Vbus) / 2.0f;
-      float set_time = POT_A / 2.0f;
-
-      Ta -= set_time;
-      Tb += set_time;
-      Tc -= set_time;
-      break;
 
     default:
       SM_force_stop();
       break;
     }
 
-    if (SVM_EN && PWM_EN)
-    {
-      InverseParkAndSVM(SVM_Vd, SVM_Vq, Vbus, SVM_theta, &Ta, &Tb, &Tc);
-    }
+    if (SVM.EN && PWM_EN)
+      InverseParkAndSVM(&SVM, Vbus);
 
     if (PWM_EN)
     {
-      htim1.Instance->CCR1 = Ta * TIMER_PERIOD;
-      htim1.Instance->CCR2 = Tb * TIMER_PERIOD;
-      htim1.Instance->CCR3 = Tc * TIMER_PERIOD;
+      if (InRange(SVM.tA) && InRange(SVM.tB) && InRange(SVM.tC))
+      {
+#ifdef SWAP_AC
+        htim1.Instance->CCR3 = SVM.tA * TIMER_PERIOD;
+        htim1.Instance->CCR2 = SVM.tB * TIMER_PERIOD;
+        htim1.Instance->CCR1 = SVM.tC * TIMER_PERIOD;
+#else
+        htim1.Instance->CCR1 = SVM.tA * TIMER_PERIOD;
+        htim1.Instance->CCR2 = SVM.tB * TIMER_PERIOD;
+        htim1.Instance->CCR3 = SVM.tC * TIMER_PERIOD;
+#endif
+      }
+      else
+        SM_force_stop();
     }
 
 #ifdef EN_DEBUG
@@ -794,6 +802,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
             &ENCODER,
             &CURRENT,
             &CURRENT_CONTROLLER,
+            &SVM,
             &Vbus);
       }
     }
@@ -801,6 +810,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
     HAL_GPIO_WritePin(LED_LOOP_GPIO_Port, LED_LOOP_Pin, GPIO_PIN_RESET);
   }
+}
+
+bool InRange(float value)
+{
+  return (value >= 0.0f) && (value <= 1.0f);
 }
 
 void Enable_TIM1_PWM(void)

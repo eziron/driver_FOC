@@ -57,14 +57,14 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define TIMER_PERIOD 5000
 #define START_PERIOD 0
-#define DEAD_TIME 109
+#define DEAD_TIME 50
+#define TIMER_ADC_CCR (TIMER_PERIOD - TIMER_ADC_DELTA)
+#define TIMER_ADC_DELTA 45
+#define TIMER_PERIOD 5000
+#define INPUT_FILTER 5
 #define TIMER_PRESCALER 0
 #define TIMER_REPETICION_COUNTER 0
-#define TIMER_ADC_DELTA 60
-#define TIMER_ADC_CCR (TIMER_PERIOD - 60)
-#define INPUT_FILTER 5
 #define SW_1_Pin GPIO_PIN_2
 #define SW_1_GPIO_Port GPIOE
 #define SW_2_Pin GPIO_PIN_3
