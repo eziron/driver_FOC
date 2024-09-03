@@ -17,7 +17,7 @@ void update_encoder_offset(EncoderSystem *encoder, float SVM_theta, int SVM_DIR,
     {
         double offset_up = OFFSET_UP_SUM / (double)OFFSET_UP_count;
         double offset_down = OFFSET_DOWN_SUM / (double)OFFSET_DOWN_count;
-        double offset = (offset_up + offset_down) / 2.0f;
+        double offset = (offset_up + offset_down) / 2.0;
 
         encoder->OFFSET = (float)offset;
 
@@ -29,7 +29,7 @@ void update_encoder_offset(EncoderSystem *encoder, float SVM_theta, int SVM_DIR,
     }
     else
     {
-        double delta = (double)encoder->global_theta - (SVM_theta / MOTOR_POLE_PAIR);
+        double delta = (double)encoder->global_theta - (SVM_theta / (double)MOTOR_POLE_PAIR);
         if (SVM_DIR)
         {
             OFFSET_UP_SUM += delta;

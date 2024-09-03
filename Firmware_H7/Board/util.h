@@ -69,6 +69,7 @@ void update_filtered_value(filter_t *filter, float new_measurement);
 float calculateAnalogVoltage(uint32_t ADC_DATA);
 
 float circular_constrain(float value);
+bool InRange(float value);
 float ABS_min_constrain(float value,float min_value);
 float ABS_max_constrain(float value,float abs_max_value);
 

@@ -55,6 +55,11 @@ float circular_constrain(float value)
   return value;
 }
 
+bool InRange(float value)
+{
+  return (value >= 0.0f) && (value <= 1.0f);
+}
+
 float ABS_min_constrain(float value,float min_value){
   if(fabsf(value) < fabsf(min_value)){
     return 0.0f;

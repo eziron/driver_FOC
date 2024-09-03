@@ -15,11 +15,12 @@
 
 #ifdef EN_DEBUG
 
+#define DEBUG_VBUS
 #define EN_DEBUG_ENCODER
 #define EN_DEBUG_CURRENT
-//#define EN_DEBUG_CONTROLLER
 #define EN_DEBUG_SVM
-#define DEBUG_VBUS
+#define EN_DEBUG_CURRENT_CONTROLLER
+#define EN_DEBUG_VELOCITY_CONTROLLER
 
 // variables del encoder
 #ifdef EN_DEBUG_ENCODER
@@ -34,30 +35,40 @@
 #define DEBUG_CURRENT_IA
 #define DEBUG_CURRENT_IB
 #define DEBUG_CURRENT_IC
-#define DEBUG_CURRENT_IALPHA
-#define DEBUG_CURRENT_IBETA
+//#define DEBUG_CURRENT_IALPHA
+//#define DEBUG_CURRENT_IBETA
 #define DEBUG_CURRENT_ID
 #define DEBUG_CURRENT_IQ
 #endif
 
 // variables del controlador de corriente
-#ifdef EN_DEBUG_CONTROLLER
-#define DEBUG_CONTROLLER_IQ_SET 
-#define DEBUG_CONTROLLER_ID_SET 
-#define DEBUG_CONTROLLER_VID    
-#define DEBUG_CONTROLLER_VIQ    
-#define DEBUG_CONTROLLER_VD     
-#define DEBUG_CONTROLLER_VQ     
+#ifdef EN_DEBUG_CURRENT_CONTROLLER
+#define DEBUG_CURRENT_CONTROLLER_Q_SET 
+#define DEBUG_CURRENT_CONTROLLER_Q_eI 
+//#define DEBUG_CURRENT_CONTROLLER_Q_eP  
+#define DEBUG_CURRENT_CONTROLLER_Q_OUT
+
+#define DEBUG_CURRENT_CONTROLLER_D_SET 
+#define DEBUG_CURRENT_CONTROLLER_D_eI    
+//#define DEBUG_CURRENT_CONTROLLER_D_eP    
+#define DEBUG_CURRENT_CONTROLLER_D_OUT     
+#endif
+
+// variables del controlador de velocidad
+#ifdef EN_DEBUG_VELOCITY_CONTROLLER
+#define DEBUG_VELOCITY_CONTROLLER_SET 
+#define DEBUG_VELOCITY_CONTROLLER_eI    
+//#define DEBUG_VELOCITY_CONTROLLER_eP  
+#define DEBUG_VELOCITY_CONTROLLER_OUT      
 #endif
 
 // variables del SVM
 #ifdef EN_DEBUG_SVM
 #define DEBUG_SVM_VD
 #define DEBUG_SVM_VQ
-#define DEBUG_SVM_VDQ
 #define DEBUG_SVM_THETA
-#define DEBUG_SVM_ALPHA
-#define DEBUG_SVM_BETA
+//#define DEBUG_SVM_ALPHA
+//#define DEBUG_SVM_BETA
 #define DEBUG_SVM_TA
 #define DEBUG_SVM_TB
 #define DEBUG_SVM_TC
@@ -83,28 +94,52 @@ typedef struct
     float el_theta;
 #endif
 
-#ifdef DEBUG_CONTROLLER_IQ_SET
-    float Iq_set;
+#ifdef DEBUG_CURRENT_CONTROLLER_Q_SET
+    float CC_q_set;
 #endif
 
-#ifdef DEBUG_CONTROLLER_ID_SET
-    float Id_set;
+#ifdef DEBUG_CURRENT_CONTROLLER_Q_eI
+    float CC_q_eI;
 #endif
 
-#ifdef DEBUG_CONTROLLER_VID
-    float Vid;
+#ifdef DEBUG_CURRENT_CONTROLLER_Q_eP
+    float CC_q_eP;
 #endif
 
-#ifdef DEBUG_CONTROLLER_VIQ
-    float Viq;
+#ifdef DEBUG_CURRENT_CONTROLLER_Q_OUT
+    float CC_q_OUT;
 #endif
 
-#ifdef DEBUG_CONTROLLER_VD
-    float Vd;
+#ifdef DEBUG_CURRENT_CONTROLLER_D_SET
+    float CC_d_set;
 #endif
 
-#ifdef DEBUG_CONTROLLER_VQ
-    float Vq;
+#ifdef DEBUG_CURRENT_CONTROLLER_D_eI
+    float CC_d_eI;
+#endif
+
+#ifdef DEBUG_CURRENT_CONTROLLER_D_eP
+    float CC_d_eP;
+#endif
+
+#ifdef DEBUG_CURRENT_CONTROLLER_D_OUT
+    float CC_d_OUT;
+#endif
+
+#ifdef DEBUG_VELOCITY_CONTROLLER_SET
+    float VC_set;
+#endif
+
+#ifdef DEBUG_VELOCITY_CONTROLLER_eI
+    float VC_eI;
+#endif
+
+#ifdef DEBUG_VELOCITY_CONTROLLER_eP
+    float VC_eP;
+#endif
+
+#ifdef DEBUG_VELOCITY_CONTROLLER_OUT
+    float VC_OUT;
 #endif
 
 #ifdef DEBUG_CURRENT_IA
@@ -145,10 +180,6 @@ typedef struct
 
 #ifdef DEBUG_SVM_VQ
     float SVM_Vq;
-#endif
-
-#ifdef DEBUG_SVM_VDQ
-    float SVM_Vdq;
 #endif
 
 #ifdef DEBUG_SVM_THETA
@@ -211,6 +242,7 @@ void add_debug_data(
     EncoderSystem *encoder_data,
     CurrentSystem *current_data,
     ControllerDQ_t *controller_data,
+    PIController_t *velocity_data,
     SVM_data_t *svm_data,
     float *vbus);
 

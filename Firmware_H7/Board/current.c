@@ -67,12 +67,12 @@ void update_current_sensor(CurrentSystem *current, int32_t ADC_RAW_A, int32_t AD
     update_current_phase_sensor(&current->phase_C, -(current->phase_A.RAW + current->phase_B.RAW));
 
     //ClarkeTransform(current->phase_A.filter.value, current->phase_B.filter.value, &current->alpha, &current->beta);
-    ClarkeTransform(current->phase_A.value, current->phase_B.value, &current->alpha, &current->beta);
+    ClarkeTransform(current->phase_A.filter.value, current->phase_B.filter.value, &current->alpha, &current->beta);
     update_filtered_value(&current->filter_alpha, current->alpha);
     update_filtered_value(&current->filter_beta, current->beta);
 
     //ParkTransform(current->filter_alpha.value, current->filter_beta.value, electric_theta, &current->d, &current->q);
-    ParkTransform(current->alpha, current->beta, electric_theta, &current->d, &current->q);
+    ParkTransform(current->filter_alpha.value, current->filter_beta.value, electric_theta, &current->d, &current->q);
     update_filtered_value(&current->filter_d, current->d);
     update_filtered_value(&current->filter_q, current->q);
 

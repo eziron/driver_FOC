@@ -53,6 +53,7 @@ void add_debug_data(
     EncoderSystem *encoder_data,
     CurrentSystem *current_data,
     ControllerDQ_t *controller_data,
+    PIController_t *velocity_data,
     SVM_data_t *svm_data,
     float *vbus)
 {
@@ -76,28 +77,52 @@ void add_debug_data(
     debug_data->write->buffer_data.el_theta = encoder_data->electric_theta;
 #endif
 
-#ifdef DEBUG_CONTROLLER_IQ_SET
-    debug_data->write->buffer_data.Iq_set = controller_data->q.set_point;
+#ifdef DEBUG_CURRENT_CONTROLLER_Q_SET
+    debug_data->write->buffer_data.CC_q_set = controller_data->q.set_point;
 #endif
 
-#ifdef DEBUG_CONTROLLER_ID_SET
-    debug_data->write->buffer_data.Id_set = controller_data->d.set_point;
+#ifdef DEBUG_CURRENT_CONTROLLER_Q_eI
+    debug_data->write->buffer_data.CC_q_eI = controller_data->q.ei;
 #endif
 
-#ifdef DEBUG_CONTROLLER_VID
-    debug_data->write->buffer_data.Vid = controller_data->d.ei;
+#ifdef DEBUG_CURRENT_CONTROLLER_Q_eP
+    debug_data->write->buffer_data.CC_q_eP = controller_data->q.ep;
 #endif
 
-#ifdef DEBUG_CONTROLLER_VIQ
-    debug_data->write->buffer_data.Viq = controller_data->q.ei;
+#ifdef DEBUG_CURRENT_CONTROLLER_Q_OUT
+    debug_data->write->buffer_data.CC_q_OUT = controller_data->q.output;
 #endif
 
-#ifdef DEBUG_CONTROLLER_VD
-    debug_data->write->buffer_data.Vd = controller_data->d.output;
+#ifdef DEBUG_CURRENT_CONTROLLER_D_SET
+    debug_data->write->buffer_data.CC_d_set = controller_data->d.set_point;
 #endif
 
-#ifdef DEBUG_CONTROLLER_VQ
-    debug_data->write->buffer_data.Vq = controller_data->q.output;
+#ifdef DEBUG_CURRENT_CONTROLLER_D_eI
+    debug_data->write->buffer_data.CC_d_eI = controller_data->d.ei;
+#endif
+
+#ifdef DEBUG_CURRENT_CONTROLLER_D_eP
+    debug_data->write->buffer_data.CC_d_eP = controller_data->d.ep;
+#endif
+
+#ifdef DEBUG_CURRENT_CONTROLLER_D_OUT
+    debug_data->write->buffer_data.CC_d_OUT = controller_data->d.output;
+#endif
+
+#ifdef DEBUG_VELOCITY_CONTROLLER_SET
+    debug_data->write->buffer_data.VC_set = velocity_data->set_point;
+#endif
+
+#ifdef DEBUG_VELOCITY_CONTROLLER_eI
+    debug_data->write->buffer_data.VC_eI = velocity_data->ei;
+#endif
+
+#ifdef DEBUG_VELOCITY_CONTROLLER_eP
+    debug_data->write->buffer_data.VC_eP = velocity_data->ep;
+#endif
+
+#ifdef DEBUG_VELOCITY_CONTROLLER_OUT
+    debug_data->write->buffer_data.VC_OUT = velocity_data->output;
 #endif
 
 #ifdef DEBUG_CURRENT_IA
@@ -138,10 +163,6 @@ void add_debug_data(
 
 #ifdef DEBUG_SVM_VQ
     debug_data->write->buffer_data.SVM_Vq = svm_data->Vq;
-#endif
-
-#ifdef DEBUG_SVM_VDQ
-    debug_data->write->buffer_data.SVM_Vdq = svm_data->Vdq;
 #endif
 
 #ifdef DEBUG_SVM_THETA

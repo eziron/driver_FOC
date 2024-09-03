@@ -72,10 +72,14 @@ SM_t SM = {0};
 tick_t TIMER_TICK = {0};
 EncoderSystem ENCODER = {0};
 CurrentSystem CURRENT = {0};
-ControllerDQ_t CURRENT_CONTROLLER = {0};
 float Ibus;
 
+ControllerDQ_t CURRENT_CONTROLLER = {0};
+PIController_t VELOCITY_CONTROLLER = {0};
+// PIDController_t VELOCITY_CONTROLLER = {0};
+
 SVM_data_t SVM = {0};
+bool PWM_EN = false;
 
 uint16_t ADC2_DMA[ADC2_DMA_SAMPLES] __ATTR_RAM_D2 = {0};
 uint16_t ADC3_DMA[ADC3_DMA_SAMPLES] __ATTR_RAM_D3 = {0};
@@ -96,11 +100,11 @@ ButtonDebounce_t SW1 = {0};
 ButtonDebounce_t SW2 = {0};
 ButtonDebounce_t SW3 = {0};
 
-bool PWM_EN = false;
-
 #ifdef EN_DEBUG
 debug_data_t debug_data __ATTR_RAM_D1 = {0};
 #endif
+
+extern USBD_HandleTypeDef hUsbDeviceFS;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -108,10 +112,10 @@ void SystemClock_Config(void);
 void PeriphCommonClock_Config(void);
 static void MPU_Config(void);
 /* USER CODE BEGIN PFP */
-bool InRange(float value);
 void Enable_TIM1_PWM(void);
 void Disable_TIM1_PWM(void);
 void SM_force_stop(void);
+uint8_t USB_Is_Connected(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -177,8 +181,11 @@ int main(void)
   MX_UART7_Init();
   MX_ADC2_Init();
   /* USER CODE BEGIN 2 */
-  HAL_Delay(1000);
-  printf("INICIO de configuracion\n");
+  if (USB_Is_Connected())
+  {
+    HAL_Delay(1000);
+    printf("INICIO de configuracion\n");
+  }
 
   setup_ADC(&ADC_VBUS, VBUS_CTO * ADC_VREF, 0.0f, 1000.0f);
 
@@ -187,7 +194,7 @@ int main(void)
   setup_ADC(&ADC_POT_C, 2.0f, 0.5f, 10.0f);
 
   calculate_alpha((float)TIMER_IT_FREC, 8000.0f, &ENCODER.filter_global_theta);
-  calculate_alpha((float)TIMER_IT_FREC, 8000.0f, &ENCODER.filter_speed);
+  calculate_alpha((float)TIMER_IT_FREC, 500.0f, &ENCODER.filter_speed);
   calculate_alpha((float)TIMER_IT_FREC, 8000.0f, &ENCODER.filter_acceleration);
 
   calculate_alpha((float)TIMER_IT_FREC, (float)CURRENT_FILTER_CUT_FREC, &CURRENT.phase_A.filter);
@@ -197,12 +204,14 @@ int main(void)
   calculate_alpha((float)TIMER_IT_FREC, (float)CURRENT_FILTER_CUT_FREC, &CURRENT.filter_alpha);
   calculate_alpha((float)TIMER_IT_FREC, (float)CURRENT_FILTER_CUT_FREC, &CURRENT.filter_beta);
 
-  calculate_alpha((float)TIMER_IT_FREC, (float)CURRENT_FILTER_CUT_FREC, &CURRENT.filter_d);
-  calculate_alpha((float)TIMER_IT_FREC, (float)CURRENT_FILTER_CUT_FREC, &CURRENT.filter_q);
+  calculate_alpha((float)TIMER_IT_FREC, 800.0f, &CURRENT.filter_d);
+  calculate_alpha((float)TIMER_IT_FREC, 800.0f, &CURRENT.filter_q);
 
   calculate_alpha((float)TIMER_IT_FREC, 8000.0f, &CURRENT.filter_bus);
 
   SetupControllerDQ(&CURRENT_CONTROLLER, CURRENT_P_GAIN, CURRENT_I_GAIN);
+  SetupPIController(&VELOCITY_CONTROLLER, VELOCITY_P_GAIN, VELOCITY_I_GAIN);
+  // SetupPIDController(&VELOCITY_CONTROLLER, VELOCITY_P_GAIN, VELOCITY_I_GAIN,VELOCITY_D_GAIN);
 
   InitButtonDebounce(&SW1, &TIMER_TICK, SW_1_GPIO_Port, SW_1_Pin, ONE_MS_TICK * 20);
   InitButtonDebounce(&SW2, &TIMER_TICK, SW_2_GPIO_Port, SW_2_Pin, ONE_MS_TICK * 20);
@@ -245,30 +254,37 @@ int main(void)
   HAL_Delay(1);
   HAL_TIM_Base_Start_IT(&htim1);
 
-  printf("FIN de configuracion\n");
+  if (USB_Is_Connected())
+    printf("FIN de configuracion\n");
 
 #ifdef EN_DEBUG
-  printf("Debug Buffer len: %u\n", DEBUG_DATA_LEN);
-  printf("Debug Data Size: %u\n", DEBUG_DATA_SIZE);
-  printf("Packet Size: %u\n", PACKET_SIZE);
+  if (USB_Is_Connected())
+  {
+    printf("Debug Buffer len: %u\n", DEBUG_DATA_LEN);
+    printf("Debug Data Size: %u\n", DEBUG_DATA_SIZE);
+    printf("Packet Size: %u\n", PACKET_SIZE);
+  }
   debug_data.EN_write = false;
   debug_data.EN_read = false;
 #endif
 
-  HAL_Delay(1000);
-  // printf("\n1/tau: %.10lf\n", CURRENT_FILTER_CUT_FREC);
-  // printf("P_GAIN: %.10lf\n", CURRENT_P_GAIN);
-  // printf("I_GAIN: %.10lf\n\n", CURRENT_I_GAIN);
-  // printf("iniciando calibracion del motor...\n");
-  // HAL_Delay(1000);
+  if (USB_Is_Connected())
+  {
+    printf("\n1/tau: %.10lf\n", CURRENT_FILTER_CUT_FREC);
+    printf("P_GAIN: %.10lf\n", CURRENT_P_GAIN);
+    printf("I_GAIN: %.10lf\n\n", CURRENT_I_GAIN);
+  }
 
   SM_add_task(&SM, START_SECUENCE);
   HAL_Delay(1);
   SM_wait_IDLE(&SM);
   HAL_Delay(1);
 
-  printf("OFFSET_IA: %ld / OFFSET_IB: %ld / OFFSET_IC: %ld / Vbus: %.8f\n", CURRENT.phase_A.OFFSET, CURRENT.phase_B.OFFSET, CURRENT.phase_C.OFFSET, Vbus);
-  HAL_Delay(5000);
+  if (USB_Is_Connected())
+  {
+    printf("OFFSET_IA: %ld / OFFSET_IB: %ld / OFFSET_IC: %ld / Vbus: %.8f\n", CURRENT.phase_A.OFFSET, CURRENT.phase_B.OFFSET, CURRENT.phase_C.OFFSET, Vbus);
+    HAL_Delay(5000);
+  }
 
   /* USER CODE END 2 */
 
@@ -280,7 +296,9 @@ int main(void)
     if (DebounceButton(&SW1) && SM.STATE != IDLE)
     {
       SM_force_stop();
-      printf("SW1: STOP PWM\n");
+
+      if (USB_Is_Connected())
+        printf("SW1: STOP PWM\n");
     }
 
     if (DebounceButton(&SW2))
@@ -291,37 +309,44 @@ int main(void)
 
         // SM_add_task(&SM, TEST_SVM_SIGNALS);
         // SM_add_task(&SM, TEST_PHASE);
+        // SM_add_task(&SM, TEST_ANGLE_OPEN_LOOP);
         // SM_add_task(&SM, TEST_OPEN_LOOP);
-        SM_add_task(&SM, TEST_ENCODER_OPEN_LOOP);
+        // SM_add_task(&SM, TEST_ENCODER_OPEN_LOOP);
         // SM_add_task(&SM, TEST_CLOSE_LOOP);
-
-        printf("SW2: START PWM\n");
+        SM_add_task(&SM, TEST_VELOCITY_CLOSE_LOOP);
+        if (USB_Is_Connected())
+          printf("SW2: START PWM\n");
       }
+#ifdef EN_DEBUG
       else
       {
-#ifdef EN_DEBUG
-        if (!debug_data.EN_write && !debug_data.EN_read)
-        {
-          printf("activando debug...\n");
-          HAL_Delay(100);
-          debug_data.first_index = 0;
-          debug_data.last_index = 0;
-          debug_data.EN_write = true;
-          HAL_Delay(1);
-          debug_data.EN_read = true;
-        }
-#endif
+        if (USB_Is_Connected())
+          if (!debug_data.EN_write && !debug_data.EN_read)
+          {
+            printf("activando debug...\n");
+            HAL_Delay(100);
+            debug_data.first_index = 0;
+            debug_data.last_index = 0;
+            debug_data.EN_write = true;
+            HAL_Delay(1);
+            debug_data.EN_read = true;
+          }
       }
+#endif
     }
 
     if (DebounceButton(&SW3))
     {
-      SM_add_task(&SM, CALIB_SECUENCE);
-      HAL_Delay(1);
-      SM_wait_IDLE(&SM);
-      HAL_Delay(100);
-      printf("Encoder OFFSET: %.9f - Index OFFSER:%ld\n", ENCODER.OFFSET, (int32_t)ENCODER.RAW_BASE_POS);
-      // HAL_Delay(5000);
+      if (SM.STATE == IDLE)
+      {
+        SM_add_task(&SM, CALIB_SECUENCE);
+        HAL_Delay(1);
+        SM_wait_IDLE(&SM);
+        HAL_Delay(100);
+        if (USB_Is_Connected())
+          printf("Encoder OFFSET: %.9f - Index OFFSER:%ld\n", ENCODER.OFFSET, (int32_t)ENCODER.RAW_BASE_POS);
+        // HAL_Delay(5000);
+      }
     }
 
 #ifdef EN_DEBUG
@@ -349,8 +374,33 @@ int main(void)
 
         // printf("SM:%2d - encoder:%6.02f - Vbus:%7.03f - POT_A:%6.03f - POT_B:%6.03f - POT_C:%6.03f - I_A:%6.02f - I_B:%6.02f\n", SM.STATE, ENCODER.filter_global_theta.value, Vbus, POT_A, POT_B, POT_C, CURRENT.phase_A.filter.value, CURRENT.phase_B.filter.value);
         // printf("SM:%2d\n", SM.STATE);
+        if (USB_Is_Connected())
+        {
+          switch (SM.STATE)
+          {
+          case IDLE:
+            printf("Vbus:%8.03f - encoder:%8.03f - POT_A:%8.03f - POT_B:%8.03f - POT_C:%8.03f\n", Vbus, ENCODER.filter_global_theta.value, POT_A, POT_B, POT_C);
+            break;
 
-        printf("Vbus:%8.03f - I_A:%8.03f - I_B:%8.03f - I_C:%8.03f - encoder:%8.05f - speed:%8.05f - POT_A:%8.03f - POT_B:%8.03f - POT_C:%8.03f\n", Vbus, CURRENT.phase_A.filter.value, CURRENT.phase_B.filter.value, CURRENT.phase_C.filter.value, ENCODER.filter_global_theta.value, ENCODER.speed, POT_A, POT_B, POT_C);
+          case TEST_OPEN_LOOP:
+          case TEST_ANGLE_OPEN_LOOP:
+          case TEST_ENCODER_OPEN_LOOP:
+            printf("Vbus:%6.02f - I_q:%6.02f - I_d:%6.02f - encoder:%8.03f - speed:%8.02f - SVM_q:%8.03f - SVM_d:%8.03f - SVM_theta:%8.03f\n", Vbus, CURRENT.filter_q.value, CURRENT.filter_d.value, ENCODER.filter_global_theta.value, ENCODER.speed, SVM.Vq, SVM.Vd, SVM.theta / (float)MOTOR_POLE_PAIR);
+            break;
+
+          case TEST_CLOSE_LOOP:
+            printf("Vbus:%6.02f - I_q:%6.02f - I_d:%6.02f - encoder:%8.03f - speed:%8.02f - CI_q:%8.03f - CI_d:%8.03f\n", Vbus, CURRENT.filter_q.value, CURRENT.filter_d.value, ENCODER.filter_global_theta.value, ENCODER.speed, CURRENT_CONTROLLER.q.set_point, CURRENT_CONTROLLER.d.set_point);
+            break;
+
+          case TEST_VELOCITY_CLOSE_LOOP:
+            printf("Vbus:%6.02f - I_q:%6.02f - I_d:%6.02f - encoder:%8.03f - speed:%8.02f - RPM:%8d - V_set:%8.03f - CI_q:%8.03f - CI_d:%8.03f\n", Vbus, CURRENT.filter_q.value, CURRENT.filter_d.value, ENCODER.filter_global_theta.value, ENCODER.speed, (int)(ENCODER.speed * 60.0), VELOCITY_CONTROLLER.set_point, CURRENT_CONTROLLER.q.set_point, CURRENT_CONTROLLER.d.set_point);
+            break;
+
+          default:
+            printf("Vbus:%8.03f - I_A:%8.03f - I_B:%8.03f - I_C:%8.03f - encoder:%8.05f - speed:%8.05f - POT_A:%8.03f - POT_B:%8.03f - POT_C:%8.03f\n", Vbus, CURRENT.phase_A.filter.value, CURRENT.phase_B.filter.value, CURRENT.phase_C.filter.value, ENCODER.filter_global_theta.value, ENCODER.speed, POT_A, POT_B, POT_C);
+            break;
+          }
+        }
       }
 #ifdef EN_DEBUG
     }
@@ -491,7 +541,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
     uint16_t RAW_A = HAL_ADCEx_InjectedGetValue(&hadc1, ADC_INJECTED_RANK_1);
     uint16_t RAW_B = HAL_ADCEx_InjectedGetValue(&hadc1, ADC_INJECTED_RANK_2);
-    update_current_sensor(&CURRENT, RAW_A, RAW_B, ENCODER.electric_theta);
+    update_current_sensor(&CURRENT, RAW_A, RAW_B, SVM.theta);
     Ibus = CURRENT.filter_bus.value;
 
     if ((Vbus <= 10.0f) && (SVM.EN || PWM_EN))
@@ -538,6 +588,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
         if (start_wait_count <= 0)
         {
+          ResetPIController(&VELOCITY_CONTROLLER);
+          ResetControllerDQ(&CURRENT_CONTROLLER);
           start_flag = false;
           PWM_EN = true;
           SM_update_task(&SM);
@@ -597,7 +649,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     case ADC_OFFSET_CALIB:
       update_current_offset(&CURRENT, RAW_A, RAW_B, false);
 
-      if (TIMER_TICK.full - UTIL_SM_TIME >= ONE_MS_TICK * 100)
+      if (TIMER_TICK.full - UTIL_SM_TIME >= ONE_MS_TICK * 50)
       {
         update_current_offset(&CURRENT, RAW_A, RAW_B, true);
         UTIL_SM_TIME = TIMER_TICK.full;
@@ -658,7 +710,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
     case OFFSET_CALIB:
     {
-      if (encoder_is_update && ((SVM.DIR && ENCODER.speed > 0.0 && ENCODER.speed < CALIB_SPEED * 2.5f) || (!SVM.DIR && ENCODER.speed < 0.0 && ENCODER.speed > -CALIB_SPEED * 2.5f)))
+      if (encoder_is_update && ((SVM.DIR && ENCODER.speed > CALIB_SPEED * 0.95f && ENCODER.speed < CALIB_SPEED * 1.05f) || (!SVM.DIR && ENCODER.speed < CALIB_SPEED * 0.95f && ENCODER.speed > -CALIB_SPEED * 1.05f)))
       {
         update_encoder_offset(&ENCODER, SVM.theta, SVM.DIR, false);
       }
@@ -707,16 +759,27 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       SVM.tC -= set_time;
       break;
 
+    case TEST_ANGLE_OPEN_LOOP:
+    {
+      SVM.EN = true;
+
+      SVM.theta = POT_C * (float)MOTOR_POLE_PAIR;
+
+      SVM.Vq = POT_A * 5.0f;
+      SVM.Vd = POT_B * 5.0f;
+
+      break;
+    }
+
     case TEST_OPEN_LOOP:
     {
       SVM.EN = true;
 
-      float dt_time = (float)TIMER_IT_PERIOD * TIMER_TIME_PERIOD;
-      SVM.theta += (POT_C * 10.0 * dt_time) * (float)MOTOR_POLE_PAIR;
+      SVM.theta += POT_C * 100.0 * (float)TIMER_IT_PERIOD * TIMER_TIME_PERIOD * (float)MOTOR_POLE_PAIR;
       SVM.theta = circular_constrain(SVM.theta);
 
-      SVM.Vq = POT_A * Vbus * 0.25;
-      SVM.Vd = POT_B * Vbus * 0.25;
+      SVM.Vq = POT_A * 5.0f;
+      SVM.Vd = POT_B * 5.0f;
 
       break;
     }
@@ -725,13 +788,20 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     {
       SVM.EN = true;
 
-      int64_t dt = (TIMER_TICK.full + TIMER_IT_PERIOD * 3) - ENCODER.buffer[ENCODER.buffer_index].time;
-      float dt_time = (float)dt * TIMER_TIME_PERIOD;
-      SVM.theta = (ENCODER.theta + (ENCODER.speed * dt_time)) * (float)MOTOR_POLE_PAIR;
-      SVM.theta = circular_constrain(SVM.theta);
+      SVM.Vq = POT_A * 15.0f * MAX_V_MOD;
+      SVM.Vd = POT_B * 15.0f * MAX_V_MOD;
 
-      SVM.Vq = POT_A * Vbus * MAX_V_MOD;
-      SVM.Vd = POT_B * 2.0;
+      if ((SVM.Vq > 0.0f && ENCODER.speed > 0.0f) || (SVM.Vq < 0.0f && ENCODER.speed < 0.0f))
+      {
+        int64_t dt = (TIMER_TICK.full + TIMER_IT_PERIOD * 3) - ENCODER.UPDATE_TICK.full;
+        float dt_time = (float)dt * TIMER_TIME_PERIOD;
+        SVM.theta = (ENCODER.theta + (ENCODER.speed * dt_time)) * (float)MOTOR_POLE_PAIR;
+        SVM.theta = circular_constrain(SVM.theta);
+      }
+      else
+      {
+        SVM.theta = ENCODER.theta * (float)MOTOR_POLE_PAIR;
+      }
 
       break;
     }
@@ -739,12 +809,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     {
       SVM.EN = true;
 
-      UpdateControllerDQ(&CURRENT_CONTROLLER, &CURRENT, POT_B, POT_A, Vbus);
+      UpdateControllerDQ(&CURRENT_CONTROLLER, &CURRENT, POT_B * 4.0f, POT_A * 4.0f, Vbus);
 
       if ((CURRENT_CONTROLLER.q.set_point > 0.0f && ENCODER.speed > 0.0f) || (CURRENT_CONTROLLER.q.set_point < 0.0f && ENCODER.speed < 0.0f))
       {
-        int64_t dt = (TIMER_TICK.full + TIMER_IT_PERIOD * 3) - ENCODER.buffer[ENCODER.buffer_index].time;
-        float dt_time = (float)dt * TIMER_TIME_PERIOD;
+        int64_t dt = (TIMER_TICK.full + TIMER_IT_PERIOD * 3) - ENCODER.UPDATE_TICK.full;
+        double dt_time = (double)dt * TIMER_TIME_PERIOD;
         SVM.theta = (ENCODER.theta + (ENCODER.speed * dt_time)) * (float)MOTOR_POLE_PAIR;
       }
       else
@@ -754,8 +824,32 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
       SVM.theta = circular_constrain(SVM.theta);
 
-      SVM.Vd = ABS_max_constrain(CURRENT_CONTROLLER.d.output, Vbus * MAX_V_MOD);
-      SVM.Vq = ABS_max_constrain(CURRENT_CONTROLLER.q.output, Vbus * MAX_V_MOD);
+      SVM.Vd = CURRENT_CONTROLLER.d.output;
+      SVM.Vq = CURRENT_CONTROLLER.q.output;
+      break;
+    }
+    case TEST_VELOCITY_CLOSE_LOOP:
+    {
+      SVM.EN = true;
+
+      UpdatePIController(&VELOCITY_CONTROLLER, POT_A * 200.0f + POT_B * 5.0, ENCODER.filter_speed.value, VELOCITY_MAX_CURRENT);
+      UpdateControllerDQ(&CURRENT_CONTROLLER, &CURRENT, POT_C * 4.0f, VELOCITY_CONTROLLER.output, Vbus);
+
+      if ((VELOCITY_CONTROLLER.set_point > 0.0f && ENCODER.speed > 0.0f) || (VELOCITY_CONTROLLER.set_point < 0.0f && ENCODER.speed < 0.0f))
+      {
+        int64_t dt = (TIMER_TICK.full + TIMER_IT_PERIOD * 6) - ENCODER.UPDATE_TICK.full;
+        double dt_time = (double)dt * TIMER_TIME_PERIOD;
+        SVM.theta = (ENCODER.theta + (ENCODER.speed * dt_time)) * (float)MOTOR_POLE_PAIR;
+      }
+      else
+      {
+        SVM.theta = ENCODER.theta * (float)MOTOR_POLE_PAIR;
+      }
+
+      SVM.theta = circular_constrain(SVM.theta);
+
+      SVM.Vd = CURRENT_CONTROLLER.d.output;
+      SVM.Vq = CURRENT_CONTROLLER.q.output;
       break;
     }
 
@@ -802,6 +896,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
             &ENCODER,
             &CURRENT,
             &CURRENT_CONTROLLER,
+            &VELOCITY_CONTROLLER,
             &SVM,
             &Vbus);
       }
@@ -810,11 +905,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
     HAL_GPIO_WritePin(LED_LOOP_GPIO_Port, LED_LOOP_Pin, GPIO_PIN_RESET);
   }
-}
-
-bool InRange(float value)
-{
-  return (value >= 0.0f) && (value <= 1.0f);
 }
 
 void Enable_TIM1_PWM(void)
@@ -831,6 +921,12 @@ void SM_force_stop()
 {
   SM_clear_task(&SM);
   SM.STATE = STOP_PWM;
+}
+
+uint8_t USB_Is_Connected(void)
+{
+  // Verifica si el estado del dispositivo es configurado
+  return (hUsbDeviceFS.dev_state == USBD_STATE_CONFIGURED);
 }
 
 int _write(int file, char *ptr, int len)
