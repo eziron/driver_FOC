@@ -1,7 +1,3 @@
-Firmware_H7/build/*.d
-Firmware_H7/build/*.lst
-Firmware_H7/build/*.o
-Firmware_H7/build/*.map
 */.vscode
 *.aux
 *.bbl*
@@ -18,5 +14,10 @@ Hardware/*/*.b#*
 Hardware/*/*.s#*
 *.Identifier
 Hardware/3D/OldVersions
-Firmware_H7/build/*.bin
-Firmware_H7/build/*.hex
+# Ignorar archivos específicos en Firmware_H7/build/ y sus subcarpetas
+Firmware_H7/build/**/*.d
+Firmware_H7/build/**/*.lst
+Firmware_H7/build/**/*.o
+Firmware_H7/build/**/*.map
+Firmware_H7/build/**/*.bin
+Firmware_H7/build/**/*.hex

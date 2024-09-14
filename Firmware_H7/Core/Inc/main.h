@@ -60,7 +60,7 @@ void Error_Handler(void);
 #define START_PERIOD 0
 #define DEAD_TIME 50
 #define TIMER_ADC_CCR (TIMER_PERIOD - TIMER_ADC_DELTA)
-#define TIMER_ADC_DELTA 45
+#define TIMER_ADC_DELTA 24
 #define TIMER_PERIOD 5000
 #define INPUT_FILTER 5
 #define TIMER_PRESCALER 0

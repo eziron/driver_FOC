@@ -1,8 +1,6 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
-
-
 #include "stdint.h"
 #include "stdbool.h"
 
@@ -19,14 +17,14 @@
 #define EN_DEBUG_ENCODER
 #define EN_DEBUG_CURRENT
 #define EN_DEBUG_SVM
-#define EN_DEBUG_CURRENT_CONTROLLER
-#define EN_DEBUG_VELOCITY_CONTROLLER
+// #define EN_DEBUG_CURRENT_CONTROLLER
+// #define EN_DEBUG_VELOCITY_CONTROLLER
 
 // variables del encoder
 #ifdef EN_DEBUG_ENCODER
 #define DEBUG_ENCODER_GLOBAL_THETA
 #define DEBUG_ENCODER_SPEED
-//#define DEBUG_ENCODER_ACCELERATION
+#define DEBUG_ENCODER_ACCELERATION
 #define DEBUG_ENCODER_ELECTRIC_THETA
 #endif
 
@@ -35,31 +33,31 @@
 #define DEBUG_CURRENT_IA
 #define DEBUG_CURRENT_IB
 #define DEBUG_CURRENT_IC
-//#define DEBUG_CURRENT_IALPHA
-//#define DEBUG_CURRENT_IBETA
+#define DEBUG_CURRENT_IALPHA
+#define DEBUG_CURRENT_IBETA
 #define DEBUG_CURRENT_ID
 #define DEBUG_CURRENT_IQ
 #endif
 
 // variables del controlador de corriente
 #ifdef EN_DEBUG_CURRENT_CONTROLLER
-#define DEBUG_CURRENT_CONTROLLER_Q_SET 
-#define DEBUG_CURRENT_CONTROLLER_Q_eI 
-//#define DEBUG_CURRENT_CONTROLLER_Q_eP  
+#define DEBUG_CURRENT_CONTROLLER_Q_SET
+#define DEBUG_CURRENT_CONTROLLER_Q_eI
+// #define DEBUG_CURRENT_CONTROLLER_Q_eP
 #define DEBUG_CURRENT_CONTROLLER_Q_OUT
 
-#define DEBUG_CURRENT_CONTROLLER_D_SET 
-#define DEBUG_CURRENT_CONTROLLER_D_eI    
-//#define DEBUG_CURRENT_CONTROLLER_D_eP    
-#define DEBUG_CURRENT_CONTROLLER_D_OUT     
+#define DEBUG_CURRENT_CONTROLLER_D_SET
+#define DEBUG_CURRENT_CONTROLLER_D_eI
+// #define DEBUG_CURRENT_CONTROLLER_D_eP
+#define DEBUG_CURRENT_CONTROLLER_D_OUT
 #endif
 
 // variables del controlador de velocidad
 #ifdef EN_DEBUG_VELOCITY_CONTROLLER
-#define DEBUG_VELOCITY_CONTROLLER_SET 
-#define DEBUG_VELOCITY_CONTROLLER_eI    
-//#define DEBUG_VELOCITY_CONTROLLER_eP  
-#define DEBUG_VELOCITY_CONTROLLER_OUT      
+#define DEBUG_VELOCITY_CONTROLLER_SET
+#define DEBUG_VELOCITY_CONTROLLER_eI
+// #define DEBUG_VELOCITY_CONTROLLER_eP
+#define DEBUG_VELOCITY_CONTROLLER_OUT
 #endif
 
 // variables del SVM
@@ -67,8 +65,8 @@
 #define DEBUG_SVM_VD
 #define DEBUG_SVM_VQ
 #define DEBUG_SVM_THETA
-//#define DEBUG_SVM_ALPHA
-//#define DEBUG_SVM_BETA
+#define DEBUG_SVM_ALPHA
+#define DEBUG_SVM_BETA
 #define DEBUG_SVM_TA
 #define DEBUG_SVM_TB
 #define DEBUG_SVM_TC
@@ -207,7 +205,6 @@ typedef struct
 #endif
 
 } debug_buffer_data_t;
-
 
 #define DEBUG_DATA_SIZE sizeof(debug_buffer_data_t)
 

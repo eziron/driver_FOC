@@ -124,9 +124,9 @@ uint8_t USB_Is_Connected(void);
 /* USER CODE END 0 */
 
 /**
- * @brief  The application entry point.
- * @retval int
- */
+  * @brief  The application entry point.
+  * @retval int
+  */
 int main(void)
 {
 
@@ -237,6 +237,7 @@ int main(void)
   HAL_TIM_OC_Start(&htim2, TIM_CHANNEL_3); // tiempo encoder index
 
   HAL_TIM_OC_Start(&htim15, TIM_CHANNEL_1);
+  HAL_TIM_OC_Start(&htim15, TIM_CHANNEL_2);
 
   HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET, ADC_SINGLE_ENDED);
   // HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET_LINEARITY, ADC_SINGLE_ENDED);
@@ -305,15 +306,15 @@ int main(void)
     {
       if (SM.STATE == IDLE)
       {
-        SM_add_task(&SM, START_PWM);
+        //SM_add_task(&SM, START_PWM);
 
-        // SM_add_task(&SM, TEST_SVM_SIGNALS);
+        SM_add_task(&SM, TEST_SVM_SIGNALS);
         // SM_add_task(&SM, TEST_PHASE);
         // SM_add_task(&SM, TEST_ANGLE_OPEN_LOOP);
         // SM_add_task(&SM, TEST_OPEN_LOOP);
         // SM_add_task(&SM, TEST_ENCODER_OPEN_LOOP);
         // SM_add_task(&SM, TEST_CLOSE_LOOP);
-        SM_add_task(&SM, TEST_VELOCITY_CLOSE_LOOP);
+        // SM_add_task(&SM, TEST_VELOCITY_CLOSE_LOOP);
         if (USB_Is_Connected())
           printf("SW2: START PWM\n");
       }
@@ -385,7 +386,7 @@ int main(void)
           case TEST_OPEN_LOOP:
           case TEST_ANGLE_OPEN_LOOP:
           case TEST_ENCODER_OPEN_LOOP:
-            printf("Vbus:%6.02f - I_q:%6.02f - I_d:%6.02f - encoder:%8.03f - speed:%8.02f - SVM_q:%8.03f - SVM_d:%8.03f - SVM_theta:%8.03f\n", Vbus, CURRENT.filter_q.value, CURRENT.filter_d.value, ENCODER.filter_global_theta.value, ENCODER.speed, SVM.Vq, SVM.Vd, SVM.theta / (float)MOTOR_POLE_PAIR);
+            printf("Vbus:%6.02f - I_q:%6.02f - I_d:%6.02f - encoder:%8.03f - speed:%8.02f - SVM_q:%8.03f - SVM_d:%8.03f - SVM_theta:%8.03f - POT_A:%8.03f - POT_B:%8.03f - POT_C:%8.03f\n", Vbus, CURRENT.filter_q.value, CURRENT.filter_d.value, ENCODER.filter_global_theta.value, ENCODER.speed, SVM.Vq, SVM.Vd, SVM.theta / (float)MOTOR_POLE_PAIR, POT_A, POT_B, POT_C);
             break;
 
           case TEST_CLOSE_LOOP:
@@ -413,36 +414,32 @@ int main(void)
 }
 
 /**
- * @brief System Clock Configuration
- * @retval None
- */
+  * @brief System Clock Configuration
+  * @retval None
+  */
 void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
   /** Supply configuration update enable
-   */
+  */
   HAL_PWREx_ConfigSupply(PWR_LDO_SUPPLY);
 
   /** Configure the main internal regulator output voltage
-   */
+  */
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-  while (!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY))
-  {
-  }
+  while(!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {}
 
   __HAL_RCC_SYSCFG_CLK_ENABLE();
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE0);
 
-  while (!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY))
-  {
-  }
+  while(!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {}
 
   /** Initializes the RCC Oscillators according to the specified parameters
-   * in the RCC_OscInitTypeDef structure.
-   */
+  * in the RCC_OscInitTypeDef structure.
+  */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
@@ -461,8 +458,10 @@ void SystemClock_Config(void)
   }
 
   /** Initializes the CPU, AHB and APB buses clocks
-   */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2 | RCC_CLOCKTYPE_D3PCLK1 | RCC_CLOCKTYPE_D1PCLK1;
+  */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2
+                              |RCC_CLOCKTYPE_D3PCLK1|RCC_CLOCKTYPE_D1PCLK1;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.SYSCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_HCLK_DIV2;
@@ -477,20 +476,20 @@ void SystemClock_Config(void)
   }
 
   /** Enables the Clock Security System
-   */
+  */
   HAL_RCC_EnableCSS();
 }
 
 /**
- * @brief Peripherals Common Clock Configuration
- * @retval None
- */
+  * @brief Peripherals Common Clock Configuration
+  * @retval None
+  */
 void PeriphCommonClock_Config(void)
 {
   RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 
   /** Initializes the peripherals clock
-   */
+  */
   PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_ADC;
   PeriphClkInitStruct.PLL2.PLL2M = 2;
   PeriphClkInitStruct.PLL2.PLL2N = 72;
@@ -544,7 +543,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     update_current_sensor(&CURRENT, RAW_A, RAW_B, SVM.theta);
     Ibus = CURRENT.filter_bus.value;
 
-    if ((Vbus <= 10.0f) && (SVM.EN || PWM_EN))
+    if ((Vbus <= 10.0f && SM.STATE != TEST_SVM_SIGNALS) && (SVM.EN || PWM_EN))
     {
       SM_force_stop();
     }
@@ -554,354 +553,383 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       SM_update_task(&SM);
     }
 
-    static uint64_t UTIL_SM_TIME = 0;
-    switch (SM.STATE)
+    if (!__HAL_TIM_IS_TIM_COUNTING_DOWN(&htim1))
     {
-    case IDLE:
-      if (PWM_EN)
+      HAL_GPIO_WritePin(LED_WARNING_GPIO_Port, LED_WARNING_Pin, GPIO_PIN_RESET);
+
+      static uint64_t UTIL_SM_TIME = 0;
+      switch (SM.STATE)
       {
-        SM_force_stop();
-      }
-      break;
-
-    case START_PWM:
-    {
-      static bool start_flag = false;
-      static int start_wait_count = 0;
-      if (!start_flag)
-      {
-        htim1.Instance->CCR1 = 0;
-        htim1.Instance->CCR2 = 0;
-        htim1.Instance->CCR3 = 0;
-
-        Enable_TIM1_PWM();
-
-        start_flag = true;
-        start_wait_count = 10;
-
-        PWM_EN = false;
-        SVM.EN = false;
-      }
-      else
-      {
-        start_wait_count--;
-
-        if (start_wait_count <= 0)
+      case IDLE:
+        if (PWM_EN)
         {
-          ResetPIController(&VELOCITY_CONTROLLER);
-          ResetControllerDQ(&CURRENT_CONTROLLER);
-          start_flag = false;
-          PWM_EN = true;
-          SM_update_task(&SM);
+          SM_force_stop();
         }
-        else if (start_wait_count <= 2)
-        {
-          HAL_GPIO_WritePin(EN_GATE_GPIO_Port, EN_GATE_Pin, GPIO_PIN_SET);
-        }
-      }
-      break;
-    }
+        break;
 
-    case STOP_PWM:
-    {
-      static bool stop_flag = false;
-      static int stop_wait_count = 0;
-      if (!stop_flag)
+      case START_PWM:
       {
-        htim1.Instance->CCR1 = 0;
-        htim1.Instance->CCR2 = 0;
-        htim1.Instance->CCR3 = 0;
-
-        stop_flag = true;
-        stop_wait_count = 10;
-
-        PWM_EN = false;
-        SVM.EN = false;
-      }
-      else
-      {
-        stop_wait_count--;
-
-        if (stop_wait_count <= 0)
+        static bool start_flag = false;
+        static int start_wait_count = 0;
+        if (!start_flag)
         {
-          stop_flag = false;
-          Disable_TIM1_PWM();
-          SM_update_task(&SM);
+          htim1.Instance->CCR1 = 0;
+          htim1.Instance->CCR2 = 0;
+          htim1.Instance->CCR3 = 0;
+
+          Enable_TIM1_PWM();
+
+          start_flag = true;
+          start_wait_count = 10;
+
+          PWM_EN = false;
+          SVM.EN = false;
         }
-        else if (stop_wait_count <= 2)
+        else
         {
-          HAL_GPIO_WritePin(EN_GATE_GPIO_Port, EN_GATE_Pin, GPIO_PIN_RESET);
+          start_wait_count--;
+
+          if (start_wait_count <= 0)
+          {
+            ResetPIController(&VELOCITY_CONTROLLER);
+            ResetControllerDQ(&CURRENT_CONTROLLER);
+            start_flag = false;
+            PWM_EN = true;
+            SM_update_task(&SM);
+          }
+          else if (start_wait_count <= 2)
+          {
+            HAL_GPIO_WritePin(EN_GATE_GPIO_Port, EN_GATE_Pin, GPIO_PIN_SET);
+          }
         }
+        break;
       }
-      break;
-    }
 
-    case START_SECUENCE:
-      // SM_add_task(&SM, START_PWM);
-      SM_add_task(&SM, ADC_OFFSET_CALIB);
-      // SM_add_task(&SM, STOP_PWM);
-
-      UTIL_SM_TIME = TIMER_TICK.full;
-
-      SM_update_task(&SM);
-      break;
-
-    case ADC_OFFSET_CALIB:
-      update_current_offset(&CURRENT, RAW_A, RAW_B, false);
-
-      if (TIMER_TICK.full - UTIL_SM_TIME >= ONE_MS_TICK * 50)
+      case STOP_PWM:
       {
-        update_current_offset(&CURRENT, RAW_A, RAW_B, true);
+        static bool stop_flag = false;
+        static int stop_wait_count = 0;
+        if (!stop_flag)
+        {
+          htim1.Instance->CCR1 = 0;
+          htim1.Instance->CCR2 = 0;
+          htim1.Instance->CCR3 = 0;
+
+          stop_flag = true;
+          stop_wait_count = 10;
+
+          PWM_EN = false;
+          SVM.EN = false;
+        }
+        else
+        {
+          stop_wait_count--;
+
+          if (stop_wait_count <= 0)
+          {
+            stop_flag = false;
+            Disable_TIM1_PWM();
+            SM_update_task(&SM);
+          }
+          else if (stop_wait_count <= 2)
+          {
+            HAL_GPIO_WritePin(EN_GATE_GPIO_Port, EN_GATE_Pin, GPIO_PIN_RESET);
+          }
+        }
+        break;
+      }
+
+      case START_SECUENCE:
+        // SM_add_task(&SM, START_PWM);
+        SM_add_task(&SM, ADC_OFFSET_CALIB);
+        // SM_add_task(&SM, STOP_PWM);
+
         UTIL_SM_TIME = TIMER_TICK.full;
-        SM_update_task(&SM);
-      }
-      break;
 
-    case CALIB_SECUENCE:
-      SM_add_task(&SM, START_PWM);
-      SM_add_task(&SM, GO_INDEX);
+        SM_update_task(&SM);
+        break;
+
+      case ADC_OFFSET_CALIB:
+        update_current_offset(&CURRENT, RAW_A, RAW_B, false);
+
+        if (TIMER_TICK.full - UTIL_SM_TIME >= ONE_MS_TICK * 50)
+        {
+          update_current_offset(&CURRENT, RAW_A, RAW_B, true);
+          UTIL_SM_TIME = TIMER_TICK.full;
+          SM_update_task(&SM);
+        }
+        break;
+
+      case CALIB_SECUENCE:
+        SM_add_task(&SM, START_PWM);
+        SM_add_task(&SM, GO_INDEX);
 
 #ifndef OFFSET_HOME
-      SM_add_task(&SM, OFFSET_CALIB);
-      ENCODER.OFFSET = 0.0f;
+        SM_add_task(&SM, OFFSET_CALIB);
+        ENCODER.OFFSET = 0.0f;
 #endif
 
-      SM_add_task(&SM, STOP_PWM);
+        SM_add_task(&SM, STOP_PWM);
 
-      SVM.Vq = 0.0f;
-      SVM.Vd = 0.0f;
-      SVM.DIR = 1;
-      SVM.EN = false;
+        SVM.Vq = 0.0f;
+        SVM.Vd = 0.0f;
+        SVM.DIR = 1;
+        SVM.EN = false;
 
-      if (ENCODER.OFFSET == 0.0f)
-        SVM.theta = 0.0f;
-      else
-        SVM.theta = ENCODER.electric_theta;
-
-      UTIL_SM_TIME = TIMER_TICK.full;
-
-      SM_update_task(&SM);
-      break;
-
-    case GO_INDEX:
-      SVM.EN = true;
-      SVM.Vq = CALIB_VOLTAGE_q;
-      SVM.Vd = CALIB_VOLTAGE_d;
-      if (index_is_update)
-      {
-        update_index_offset(&ENCODER);
+        if (ENCODER.OFFSET == 0.0f)
+          SVM.theta = 0.0f;
+        else
+          SVM.theta = ENCODER.electric_theta;
 
         UTIL_SM_TIME = TIMER_TICK.full;
 
+        SM_update_task(&SM);
+        break;
+
+      case GO_INDEX:
+        SVM.EN = true;
+        SVM.Vq = CALIB_VOLTAGE_q;
+        SVM.Vd = CALIB_VOLTAGE_d;
+        if (index_is_update)
+        {
+          update_index_offset(&ENCODER);
+
+          UTIL_SM_TIME = TIMER_TICK.full;
+
 #ifdef OFFSET_HOME
-        ENCODER.OFFSET = OFFSET_HOME;
+          ENCODER.OFFSET = OFFSET_HOME;
 #else
-        SVM.theta = 0.0f;
-        SVM.DIR = 1;
+          SVM.theta = 0.0f;
+          SVM.DIR = 1;
 #endif
 
-        SM_update_task(&SM);
-      }
-      else
+          SM_update_task(&SM);
+        }
+        else
+        {
+          SVM.theta += CALIB_ELECTRIC_SPEED * (float)TIMER_IT_PERIOD * TIMER_TIME_PERIOD;
+        }
+        break;
+
+      case OFFSET_CALIB:
       {
-        SVM.theta += CALIB_ELECTRIC_SPEED * (float)TIMER_IT_PERIOD * TIMER_TIME_PERIOD;
+        if (encoder_is_update && ((SVM.DIR && ENCODER.speed > CALIB_SPEED * 0.95f && ENCODER.speed < CALIB_SPEED * 1.05f) || (!SVM.DIR && ENCODER.speed < CALIB_SPEED * 0.95f && ENCODER.speed > -CALIB_SPEED * 1.05f)))
+        {
+          update_encoder_offset(&ENCODER, SVM.theta, SVM.DIR, false);
+        }
+
+        if (SVM.DIR && ENCODER.global_theta >= 1.0f)
+        {
+          SVM.DIR = 0;
+        }
+        else if (!SVM.DIR && ENCODER.global_theta <= 0.0f)
+        {
+          update_encoder_offset(&ENCODER, SVM.theta, SVM.DIR, true);
+          SM_update_task(&SM);
+        }
+
+        SVM.EN = true;
+        SVM.Vq = CALIB_VOLTAGE_q;
+        SVM.Vd = CALIB_VOLTAGE_d;
+
+        SVM.theta += (SVM.DIR ? CALIB_ELECTRIC_SPEED : -CALIB_ELECTRIC_SPEED) * (float)TIMER_IT_PERIOD * TIMER_TIME_PERIOD;
+        break;
       }
-      break;
-
-    case OFFSET_CALIB:
-    {
-      if (encoder_is_update && ((SVM.DIR && ENCODER.speed > CALIB_SPEED * 0.95f && ENCODER.speed < CALIB_SPEED * 1.05f) || (!SVM.DIR && ENCODER.speed < CALIB_SPEED * 0.95f && ENCODER.speed > -CALIB_SPEED * 1.05f)))
+      case TEST_SVM_SIGNALS:
       {
-        update_encoder_offset(&ENCODER, SVM.theta, SVM.DIR, false);
+        if (PWM_EN)
+        {
+          SVM.theta = SVM.theta + (15.0f / 360.0f);
+          if(SVM.theta >= 1.0f)
+            SVM.theta = 0.0f;
+
+          SVM.Vq = 1.0f;
+          SVM.Vd = 0.0;
+
+          InverseParkAndSVM(&SVM, 2.0);
+        }
+        else
+        {
+          HAL_GPIO_WritePin(EN_GATE_GPIO_Port, EN_GATE_Pin, GPIO_PIN_RESET);
+          Enable_TIM1_PWM();
+          PWM_EN = 1;
+          SVM.EN = 0;
+        }
+        break;
       }
 
-      if (SVM.DIR && ENCODER.global_theta >= 1.0f)
+      case TEST_PHASE:
+        SVM.EN = false;
+        SVM.tA = 0.5f;
+        SVM.tB = 0.5f;
+        SVM.tC = 0.5f;
+
+        float set_V = POT_A;
+        float set_time = (set_V / Vbus) / 2.0f;
+        // float set_time = POT_A / 2.0f;
+
+        SVM.tA -= set_time;
+        SVM.tB += set_time;
+        SVM.tC -= set_time;
+        break;
+
+      case TEST_ANGLE_OPEN_LOOP:
       {
-        SVM.DIR = 0;
+        SVM.EN = true;
+
+        SVM.theta = POT_C * (float)MOTOR_POLE_PAIR;
+
+        SVM.Vq = POT_A * 5.0f;
+        SVM.Vd = POT_B * 5.0f;
+
+        break;
       }
-      else if (!SVM.DIR && ENCODER.global_theta <= 0.0f)
+
+      case TEST_OPEN_LOOP:
       {
-        update_encoder_offset(&ENCODER, SVM.theta, SVM.DIR, true);
-        SM_update_task(&SM);
-      }
+        SVM.EN = true;
 
-      SVM.EN = true;
-      SVM.Vq = CALIB_VOLTAGE_q;
-      SVM.Vd = CALIB_VOLTAGE_d;
-
-      SVM.theta += (SVM.DIR ? CALIB_ELECTRIC_SPEED : -CALIB_ELECTRIC_SPEED) * (float)TIMER_IT_PERIOD * TIMER_TIME_PERIOD;
-      break;
-    }
-    case TEST_SVM_SIGNALS:
-    {
-      SVM.theta = circular_constrain(SVM.theta + 0.1f);
-
-      SVM.Vq = 1.0f;
-      SVM.Vd = 0.0;
-
-      InverseParkAndSVM(&SVM, 2.0);
-
-      break;
-    }
-
-    case TEST_PHASE:
-      SVM.EN = false;
-      SVM.tA = 0.5f;
-      SVM.tB = 0.5f;
-      SVM.tC = 0.5f;
-
-      float set_V = POT_A;
-      float set_time = (set_V / Vbus) / 2.0f;
-      // float set_time = POT_A / 2.0f;
-
-      SVM.tA -= set_time;
-      SVM.tB += set_time;
-      SVM.tC -= set_time;
-      break;
-
-    case TEST_ANGLE_OPEN_LOOP:
-    {
-      SVM.EN = true;
-
-      SVM.theta = POT_C * (float)MOTOR_POLE_PAIR;
-
-      SVM.Vq = POT_A * 5.0f;
-      SVM.Vd = POT_B * 5.0f;
-
-      break;
-    }
-
-    case TEST_OPEN_LOOP:
-    {
-      SVM.EN = true;
-
-      SVM.theta += POT_C * 100.0 * (float)TIMER_IT_PERIOD * TIMER_TIME_PERIOD * (float)MOTOR_POLE_PAIR;
-      SVM.theta = circular_constrain(SVM.theta);
-
-      SVM.Vq = POT_A * 5.0f;
-      SVM.Vd = POT_B * 5.0f;
-
-      break;
-    }
-
-    case TEST_ENCODER_OPEN_LOOP:
-    {
-      SVM.EN = true;
-
-      SVM.Vq = POT_A * 15.0f * MAX_V_MOD;
-      SVM.Vd = POT_B * 15.0f * MAX_V_MOD;
-
-      if ((SVM.Vq > 0.0f && ENCODER.speed > 0.0f) || (SVM.Vq < 0.0f && ENCODER.speed < 0.0f))
-      {
-        int64_t dt = (TIMER_TICK.full + TIMER_IT_PERIOD * 3) - ENCODER.UPDATE_TICK.full;
-        float dt_time = (float)dt * TIMER_TIME_PERIOD;
-        SVM.theta = (ENCODER.theta + (ENCODER.speed * dt_time)) * (float)MOTOR_POLE_PAIR;
+        SVM.theta += POT_C * 100.0 * (float)TIMER_IT_PERIOD * TIMER_TIME_PERIOD * (float)MOTOR_POLE_PAIR;
         SVM.theta = circular_constrain(SVM.theta);
+
+        SVM.Vq = POT_A * 5.0f;
+        SVM.Vd = POT_B * 5.0f;
+
+        break;
       }
-      else
+
+      case TEST_ENCODER_OPEN_LOOP:
       {
-        SVM.theta = ENCODER.theta * (float)MOTOR_POLE_PAIR;
+        SVM.EN = true;
+
+        if (debug_data.EN_read)
+        {
+          // SVM.Vq = POT_A * 10.0f;
+          // SVM.Vd = POT_B * 10.0f;
+          SVM.Vq = 1.0f;
+          SVM.Vd = 0.0f;
+        }
+        else
+        {
+          SVM.Vq = 0.0f;
+          SVM.Vd = 0.0f;
+        }
+
+        if ((SVM.Vq > 0.0f && ENCODER.speed > 0.0f) || (SVM.Vq < 0.0f && ENCODER.speed < 0.0f))
+        {
+          int64_t dt = (TIMER_TICK.full + TIMER_IT_PERIOD * 3) - ENCODER.UPDATE_TICK.full;
+          float dt_time = (float)dt * TIMER_TIME_PERIOD;
+          SVM.theta = (ENCODER.theta + (ENCODER.speed * dt_time)) * (float)MOTOR_POLE_PAIR;
+          SVM.theta = circular_constrain(SVM.theta);
+        }
+        else
+        {
+          SVM.theta = ENCODER.theta * (float)MOTOR_POLE_PAIR;
+        }
+
+        break;
       }
-
-      break;
-    }
-    case TEST_CLOSE_LOOP:
-    {
-      SVM.EN = true;
-
-      UpdateControllerDQ(&CURRENT_CONTROLLER, &CURRENT, POT_B * 4.0f, POT_A * 4.0f, Vbus);
-
-      if ((CURRENT_CONTROLLER.q.set_point > 0.0f && ENCODER.speed > 0.0f) || (CURRENT_CONTROLLER.q.set_point < 0.0f && ENCODER.speed < 0.0f))
+      case TEST_CLOSE_LOOP:
       {
-        int64_t dt = (TIMER_TICK.full + TIMER_IT_PERIOD * 3) - ENCODER.UPDATE_TICK.full;
-        double dt_time = (double)dt * TIMER_TIME_PERIOD;
-        SVM.theta = (ENCODER.theta + (ENCODER.speed * dt_time)) * (float)MOTOR_POLE_PAIR;
+        SVM.EN = true;
+
+        UpdateControllerDQ(&CURRENT_CONTROLLER, &CURRENT, POT_B * 4.0f, POT_A * 4.0f, Vbus);
+
+        if ((CURRENT_CONTROLLER.q.set_point > 0.0f && ENCODER.speed > 0.0f) || (CURRENT_CONTROLLER.q.set_point < 0.0f && ENCODER.speed < 0.0f))
+        {
+          int64_t dt = (TIMER_TICK.full + TIMER_IT_PERIOD * 3) - ENCODER.UPDATE_TICK.full;
+          double dt_time = (double)dt * TIMER_TIME_PERIOD;
+          SVM.theta = (ENCODER.theta + (ENCODER.speed * dt_time)) * (float)MOTOR_POLE_PAIR;
+        }
+        else
+        {
+          SVM.theta = ENCODER.theta * (float)MOTOR_POLE_PAIR;
+        }
+
+        SVM.theta = circular_constrain(SVM.theta);
+
+        SVM.Vd = CURRENT_CONTROLLER.d.output;
+        SVM.Vq = CURRENT_CONTROLLER.q.output;
+        break;
       }
-      else
+      case TEST_VELOCITY_CLOSE_LOOP:
       {
-        SVM.theta = ENCODER.theta * (float)MOTOR_POLE_PAIR;
+        SVM.EN = true;
+
+        UpdatePIController(&VELOCITY_CONTROLLER, POT_A * 200.0f + POT_B * 5.0, ENCODER.filter_speed.value, VELOCITY_MAX_CURRENT);
+        UpdateControllerDQ(&CURRENT_CONTROLLER, &CURRENT, POT_C * 4.0f, VELOCITY_CONTROLLER.output, Vbus);
+
+        if ((VELOCITY_CONTROLLER.set_point > 0.0f && ENCODER.speed > 0.0f) || (VELOCITY_CONTROLLER.set_point < 0.0f && ENCODER.speed < 0.0f))
+        {
+          int64_t dt = (TIMER_TICK.full + TIMER_IT_PERIOD * 6) - ENCODER.UPDATE_TICK.full;
+          double dt_time = (double)dt * TIMER_TIME_PERIOD;
+          SVM.theta = (ENCODER.theta + (ENCODER.speed * dt_time)) * (float)MOTOR_POLE_PAIR;
+        }
+        else
+        {
+          SVM.theta = ENCODER.theta * (float)MOTOR_POLE_PAIR;
+        }
+
+        SVM.theta = circular_constrain(SVM.theta);
+
+        SVM.Vd = CURRENT_CONTROLLER.d.output;
+        SVM.Vq = CURRENT_CONTROLLER.q.output;
+        break;
       }
 
-      SVM.theta = circular_constrain(SVM.theta);
-
-      SVM.Vd = CURRENT_CONTROLLER.d.output;
-      SVM.Vq = CURRENT_CONTROLLER.q.output;
-      break;
-    }
-    case TEST_VELOCITY_CLOSE_LOOP:
-    {
-      SVM.EN = true;
-
-      UpdatePIController(&VELOCITY_CONTROLLER, POT_A * 200.0f + POT_B * 5.0, ENCODER.filter_speed.value, VELOCITY_MAX_CURRENT);
-      UpdateControllerDQ(&CURRENT_CONTROLLER, &CURRENT, POT_C * 4.0f, VELOCITY_CONTROLLER.output, Vbus);
-
-      if ((VELOCITY_CONTROLLER.set_point > 0.0f && ENCODER.speed > 0.0f) || (VELOCITY_CONTROLLER.set_point < 0.0f && ENCODER.speed < 0.0f))
-      {
-        int64_t dt = (TIMER_TICK.full + TIMER_IT_PERIOD * 6) - ENCODER.UPDATE_TICK.full;
-        double dt_time = (double)dt * TIMER_TIME_PERIOD;
-        SVM.theta = (ENCODER.theta + (ENCODER.speed * dt_time)) * (float)MOTOR_POLE_PAIR;
-      }
-      else
-      {
-        SVM.theta = ENCODER.theta * (float)MOTOR_POLE_PAIR;
-      }
-
-      SVM.theta = circular_constrain(SVM.theta);
-
-      SVM.Vd = CURRENT_CONTROLLER.d.output;
-      SVM.Vq = CURRENT_CONTROLLER.q.output;
-      break;
-    }
-
-    default:
-      SM_force_stop();
-      break;
-    }
-
-    if (SVM.EN && PWM_EN)
-      InverseParkAndSVM(&SVM, Vbus);
-
-    if (PWM_EN)
-    {
-      if (InRange(SVM.tA) && InRange(SVM.tB) && InRange(SVM.tC))
-      {
-#ifdef SWAP_AC
-        htim1.Instance->CCR3 = SVM.tA * TIMER_PERIOD;
-        htim1.Instance->CCR2 = SVM.tB * TIMER_PERIOD;
-        htim1.Instance->CCR1 = SVM.tC * TIMER_PERIOD;
-#else
-        htim1.Instance->CCR1 = SVM.tA * TIMER_PERIOD;
-        htim1.Instance->CCR2 = SVM.tB * TIMER_PERIOD;
-        htim1.Instance->CCR3 = SVM.tC * TIMER_PERIOD;
-#endif
-      }
-      else
+      default:
         SM_force_stop();
-    }
+        break;
+      }
+
+      if (SVM.EN && PWM_EN)
+        InverseParkAndSVM(&SVM, Vbus);
+
+      if (PWM_EN)
+      {
+        if (InRange(SVM.tA) && InRange(SVM.tB) && InRange(SVM.tC))
+        {
+#ifdef SWAP_AC
+          htim1.Instance->CCR3 = SVM.tA * TIMER_PERIOD;
+          htim1.Instance->CCR2 = SVM.tB * TIMER_PERIOD;
+          htim1.Instance->CCR1 = SVM.tC * TIMER_PERIOD;
+#else
+          htim1.Instance->CCR1 = SVM.tA * TIMER_PERIOD;
+          htim1.Instance->CCR2 = SVM.tB * TIMER_PERIOD;
+          htim1.Instance->CCR3 = SVM.tC * TIMER_PERIOD;
+#endif
+        }
+        else
+          SM_force_stop();
+      }
 
 #ifdef EN_DEBUG
 
-    if (debug_data.EN_write)
-    {
-      debug_data.first_index = (debug_data.first_index + 1) % DEBUG_DATA_LEN;
-      if (debug_data.first_index == debug_data.last_index)
+      if (debug_data.EN_write)
       {
-        debug_data.EN_write = false;
+        debug_data.first_index = (debug_data.first_index + 1) % DEBUG_DATA_LEN;
+        if (debug_data.first_index == debug_data.last_index)
+        {
+          debug_data.EN_write = false;
+        }
+        else
+        {
+          add_debug_data(
+              &debug_data,
+              &TIMER_TICK,
+              &ENCODER,
+              &CURRENT,
+              &CURRENT_CONTROLLER,
+              &VELOCITY_CONTROLLER,
+              &SVM,
+              &Vbus);
+        }
       }
-      else
-      {
-        add_debug_data(
-            &debug_data,
-            &TIMER_TICK,
-            &ENCODER,
-            &CURRENT,
-            &CURRENT_CONTROLLER,
-            &VELOCITY_CONTROLLER,
-            &SVM,
-            &Vbus);
-      }
-    }
 #endif
+    }
+    else{
+      HAL_GPIO_WritePin(LED_WARNING_GPIO_Port, LED_WARNING_Pin, GPIO_PIN_SET);
+    }
 
     HAL_GPIO_WritePin(LED_LOOP_GPIO_Port, LED_LOOP_Pin, GPIO_PIN_RESET);
   }
@@ -942,7 +970,7 @@ int _write(int file, char *ptr, int len)
 
 /* USER CODE END 4 */
 
-/* MPU Configuration */
+ /* MPU Configuration */
 
 void MPU_Config(void)
 {
@@ -952,7 +980,7 @@ void MPU_Config(void)
   HAL_MPU_Disable();
 
   /** Initializes and configures the Region and the memory to be protected
-   */
+  */
   MPU_InitStruct.Enable = MPU_REGION_ENABLE;
   MPU_InitStruct.Number = MPU_REGION_NUMBER0;
   MPU_InitStruct.BaseAddress = 0x24000000;
@@ -968,7 +996,7 @@ void MPU_Config(void)
   HAL_MPU_ConfigRegion(&MPU_InitStruct);
 
   /** Initializes and configures the Region and the memory to be protected
-   */
+  */
   MPU_InitStruct.Number = MPU_REGION_NUMBER1;
   MPU_InitStruct.BaseAddress = 0x30000000;
   MPU_InitStruct.Size = MPU_REGION_SIZE_256KB;
@@ -977,7 +1005,7 @@ void MPU_Config(void)
   HAL_MPU_ConfigRegion(&MPU_InitStruct);
 
   /** Initializes and configures the Region and the memory to be protected
-   */
+  */
   MPU_InitStruct.Number = MPU_REGION_NUMBER2;
   MPU_InitStruct.BaseAddress = 0x38000000;
   MPU_InitStruct.Size = MPU_REGION_SIZE_64KB;
@@ -985,7 +1013,7 @@ void MPU_Config(void)
   HAL_MPU_ConfigRegion(&MPU_InitStruct);
 
   /** Initializes and configures the Region and the memory to be protected
-   */
+  */
   MPU_InitStruct.Number = MPU_REGION_NUMBER3;
   MPU_InitStruct.BaseAddress = 0x20000000;
   MPU_InitStruct.Size = MPU_REGION_SIZE_128KB;
@@ -996,12 +1024,13 @@ void MPU_Config(void)
   HAL_MPU_ConfigRegion(&MPU_InitStruct);
   /* Enables the MPU */
   HAL_MPU_Enable(MPU_PRIVILEGED_DEFAULT);
+
 }
 
 /**
- * @brief  This function is executed in case of error occurrence.
- * @retval None
- */
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
@@ -1013,14 +1042,14 @@ void Error_Handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef USE_FULL_ASSERT
+#ifdef  USE_FULL_ASSERT
 /**
- * @brief  Reports the name of the source file and the source line number
- *         where the assert_param error has occurred.
- * @param  file: pointer to the source file name
- * @param  line: assert_param error line source number
- * @retval None
- */
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
