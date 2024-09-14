@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
@@ -12,20 +13,29 @@ def select_csv_file():
     )
     return filename
 
+def obtener_archivos_csv(directorio:str):
+    archivos_csv = []
+    # Iterar sobre los archivos en el directorio
+    for archivo in os.listdir(directorio):
+        # Verificar si el archivo tiene la extensión .csv
+        if archivo.endswith(".csv"):
+            archivos_csv.append(archivo)
+    return archivos_csv
 
-def plot_csv_data(filename):
+
+def plot_csv_data(PATH:str,filename:str):
     try:
-        data = pd.read_csv(filename)
+        data = pd.read_csv(PATH + filename)
 
         plots = [
             {"title": "Vbus", "vars": ["vbus"], "ylabel": "Volt"},
             {
-                "title": "Encoder Theta and Electric Theta",
+                "title": "Encoder Theta y Electric Theta",
                 "vars": ["theta", "el_theta","SVM_theta"],
                 "ylabel": "Turns",
             },
             {
-                "title": "Encoder Speed",
+                "title": "Velocidad de rotación",
                 "vars": ["speed", "VC_set"],
                 "ylabel": "Turns / s",
             },
@@ -34,19 +44,19 @@ def plot_csv_data(filename):
                 "vars": ["VC_eI", "VC_eP","VC_OUT"],
                 "ylabel": "Amper",
             },
-            {"title": "Encoder Acceleration", "vars": ["acc"], "ylabel": "Turns / s²"},
+            {"title": "Aceleración", "vars": ["acc"], "ylabel": "Turns / s²"},
             {
-                "title": "Phase Currents",
+                "title": "Corrientes de fase",
                 "vars": ["Ia", "Ib", "Ic"],
                 "ylabel": "Amperes",
             },
             {
-                "title": "2 Phase Currents",
+                "title": "Corrientes Alpha Beta",
                 "vars": ["Ialpha", "Ibeta"],
                 "ylabel": "Amperes",
             },
             {
-                "title": "DQ Currents",
+                "title": "Corrientes DQ",
                 "vars": [
                     "Id",
                     "Iq",
@@ -58,7 +68,7 @@ def plot_csv_data(filename):
                 "ylabel": "Amperes d-q",
             },
             {
-                "title": "DQ Controller",
+                "title": "Controlador DQ",
                 "vars": [
                     "Vid",
                     "Vd",
@@ -73,7 +83,7 @@ def plot_csv_data(filename):
                 ],
                 "ylabel": "Volts d-q",
             },
-            {"title": "SVM Voltages dq", "vars": ["SVM_Vd", "SVM_Vq"], "ylabel": "Volts d-q"},
+            {"title": "Voltajes dq", "vars": ["SVM_Vd", "SVM_Vq"], "ylabel": "Volts d-q"},
             {
                 "title": "SVM alpha beta",
                 "vars": ["SVM_alpha", "SVM_beta"],
@@ -96,14 +106,14 @@ def plot_csv_data(filename):
         fig = make_subplots(rows=len(available_plots), cols=1, shared_xaxes=True,subplot_titles=available_titles,vertical_spacing=0.027)
 
         color_palette = [
-            "#00FF00",
-            "#FF4500",
-            "#1E90FF",
-            "#FFD700",
-            "#FF69B4",
-            "#8A2BE2",
-            "#00CED1",
-            "#FF6347",
+            "#1E90FF",  # Azul dodger (brillante)
+            "#32CD32",  # Verde lima
+            "#FF4500",  # Rojo anaranjado
+            "#9400D3",  # Violeta oscuro
+            "#FFD700",  # Amarillo dorado (único amarillo)
+            "#FF6347",  # Tomate (Rojo)
+            "#4682B4",  # Azul acero
+            "#8A2BE2",  # Azul violáceo
         ]
 
         for i, plot in enumerate(available_plots):
@@ -127,33 +137,30 @@ def plot_csv_data(filename):
             fig.update_yaxes(title_text=plot["ylabel"], row=i + 1, col=1)
             fig.update_xaxes(title_text="Time (ms)", row=i + 1, col=1,showticklabels=True)
 
-        # Configuración de estilo de osciloscopio con mejoras visuales
+        # Configuración de estilo de osciloscopio con fondo blanco
         fig.update_layout(
             height=300 * len(available_plots),
-            width=1500,
-            title_text="Gráficos de Control FOC - Vista Completa",
+            width=1800,
+            title_text=f"Gráficos de Control FOC - Vista Completa {filename}",
             hovermode="x unified",
-            template="plotly_dark",  # Fondo oscuro
-            plot_bgcolor="black",  # Fondo del gráfico negro
-            paper_bgcolor="black",  # Fondo de la figura negro
-            font=dict(color="lime"),  # Color del texto verde
+            template="plotly_white",  # Fondo blanco
+            plot_bgcolor="white",  # Fondo del gráfico blanco
+            paper_bgcolor="white",  # Fondo de la figura blanco
+            font=dict(color="black"),  # Color del texto negro
             xaxis=dict(
                 showgrid=True,
-                gridcolor="gray",
+                gridcolor="lightgray",  # Cuadrícula gris claro
                 zeroline=True,
-                zerolinecolor="gray",
-                tickcolor="lime",
+                zerolinecolor="lightgray",  # Línea cero gris claro
+                tickcolor="black",  # Color de las marcas negro
             ),
             yaxis=dict(
                 showgrid=True,
-                gridcolor="gray",
+                gridcolor="lightgray",  # Cuadrícula gris claro
                 zeroline=True,
-                zerolinecolor="gray",
-                tickcolor="lime",
-            ),
-            #legend=dict(
-            #    orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1
-            #),
+                zerolinecolor="lightgray",  # Línea cero gris claro
+                tickcolor="black",  # Color de las marcas negro
+            )
         )
 
         fig.show()
@@ -173,4 +180,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    #main()
+    
+    directorio = 'C:/Users/kraed/OneDrive/Documentos/00 apuntes clases/Proyecto de titulo/driver_FOC/util/Debug_LOGS/'
+    archivos_csv = obtener_archivos_csv(directorio)
+    for filename in archivos_csv:
+        print(f"Graficando: {filename}")
+        plot_csv_data(directorio,filename)

@@ -1,4 +1,4 @@
-*/.vscode
+.vscode/
 *.aux
 *.bbl*
 *.bcf
@@ -14,7 +14,6 @@ Hardware/*/*.b#*
 Hardware/*/*.s#*
 *.Identifier
 Hardware/3D/OldVersions
-# Ignorar archivos específicos en Firmware_H7/build/ y sus subcarpetas
 Firmware_H7/build/**/*.d
 Firmware_H7/build/**/*.lst
 Firmware_H7/build/**/*.o

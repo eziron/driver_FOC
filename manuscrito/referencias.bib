@@ -12,8 +12,8 @@
   url       = {https://ieeexplore.ieee.org/servlet/opac?bknumber=5237895}
 }
 
-#microchip FOC
-@manual{AN2757_00,
+#microchip encoder FOC
+@manual{AN2757,
   title  = {Sensored (Encoder-Based) Field Oriented Control of a Three Phase Permanent Magnet Synchronous Motor (PMSM)},
   author = {{Microchip Technology Inc.}},
   year   = {2018},
@@ -21,6 +21,18 @@
   note   = {AN2757},
   url    = {https://www.microchip.com/en-us/application-notes/an2757}
 }
+
+#microchip sensorless FOC
+@manual{AN1078,
+  title  = {Sensorless Field Oriented Control of a PMSM using a Sliding Mode Observer (SMO)},
+  author = {Jorge Zambada and Debraj Deb},
+  year   = {2015},
+  month  = {6},
+  day    = {24},
+  note   = {AN1078},
+  url    = {https://www.microchip.com/en-us/application-notes/an1078}
+}
+
 
 #SVM de Odrive
 @misc{odrive_SVM,
@@ -69,8 +81,26 @@
   url         = {https://www.ti.com/lit/an/sprt703/sprt703.pdf}
 }
 
+#referencia esquema de las transformadas en FOC
+@article{frick2018bldc,
+  author    = {Charles Frick},
+  title     = {Brushless DC Motors Introduction for Next-Generation Missile Actuation Systems Outline},
+  journal   = {Analog Devices},
+  year      = {2018},
+  month     = {October},
+  url       = {https://www.analog.com/en/resources/technical-articles/brushless-dc-motors-introduction-for-next-generation-missile-actuation-systems-outline.html},
+  publisher = {Analog Devices, Inc.}
+}
 
-
+@article{Garca2011ComparisonBF,
+  title={Comparison between FOC and DTC Strategies for Permanent Magnet Synchronous Motors},
+  author={Xavier del Toro Garc{\'i}a and Branislav Zigmund and Angela A. Terlizzi and Rastislav Pavlanin and Ligui Salvatore},
+  journal={Advances in Electrical and Electronic Engineering},
+  year={2011},
+  volume={5},
+  pages={76-81},
+  url={https://api.semanticscholar.org/CorpusID:55185286}
+}
 
 #Referencias trapezoidal
 
@@ -96,11 +126,22 @@
   school      = {CQUniversity Australia},
   year        = {2014},
   month       = May,
-  pages       = {3},
+  pages       = {14},
   type        = {Bachelor of Engineering Thesis},
   note        = {Final year research project report submitted in partial fulfillment of the coursework requirements for the degree of Bachelor of Engineering},
   institution = {School of Engineering \& Technology, CQUniversity Australia},
   url         = {https://www.ti.com/lit/an/sprt703/sprt703.pdf}
+}
+
+
+
+%referencia baja presicion y alto ripple del control trapezoidal
+@misc{juanpere_tecnicas,
+  title        = {{Técnicas de control para motores Brushless: Comparativa entre conmutación Trapezoidal, conmutación Sinusoidal y Control Vectorial}},
+  author       = {Roger Juanpere Tolrà},
+  organization = {ingenia-cat - Motion Control Department},
+  address      = {C./Llacuna 162, Barcelona - Spain},
+  url          = {https://www.motronic.es/upfiles/taller_img/files/mantenimiento-y-reparacion-de-servomotores-es_2595.pdf}
 }
 
 #referencia deteccion de BEMF
@@ -114,14 +155,5 @@
   month    = September,
   keywords = {Sensorless BLDC drive, direct back EMF sensing, start-up},
   url      = {http://educypedia.karadimov.info/library/T.pdf}
-}
-
-%referencia baja presicion y alto ripple del control trapezoidal
-@misc{juanpere_tecnicas,
-  title        = {{Técnicas de control para motores Brushless: Comparativa entre conmutación Trapezoidal, conmutación Sinusoidal y Control Vectorial}},
-  author       = {Roger Juanpere Tolrà},
-  organization = {ingenia-cat - Motion Control Department},
-  address      = {C./Llacuna 162, Barcelona - Spain},
-  url          = {https://www.motronic.es/upfiles/taller_img/files/mantenimiento-y-reparacion-de-servomotores-es_2595.pdf}
 }
 

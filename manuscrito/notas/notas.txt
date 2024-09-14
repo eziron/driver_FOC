@@ -44,6 +44,6 @@ Sobre la configuracion del STM32:
                 - principalmente se tomo como referencia para la implementacion de hardware, ya que es un driver con unas prestaciones bastante sobre salientes y aun que su codigo tambien es open sourse y utiliza un control FOC, su proposito esta mas orientaod al uso en scooters, skate y sistemas de propulcion similaes que no requieren una alta presicion y no tanto para un uso en robotica
 
             SimpleFOC: 
-                - es una libreria de control FOC que tiene un gran enfoque para su uso en robotica y la presicion, pero solo para motores de baja potencia
+                - es una libreria de control FOC que tiene un gran enfoque para su uso en robótica y la presicion, pero solo para motores de baja potencia
 
-                - se utilizo para el esquema de control, al ser el mas simplificado y especificamente orientado para su uso en robotica
+                - se utilizo para el esquema de control, al ser el mas simplificado y específicamente orientado para su uso en robótica
