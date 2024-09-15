@@ -127,10 +127,10 @@ Los motores \textit{brushless} tienen tres fases que pueden ser energizadas de m
 El control FOC es una de las técnicas más utilizadas para el control de motores \textit{brushless} en robótica, debido a que ofrece una alta eficiencia, un bajo rizado de torque y una gran precisión en el control del motor \cite{Garca2011ComparisonBF}\cite{juanpere_tecnicas}.
 
 \begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.8\textwidth]{imagenes/transformadas_foc.png}
-    \caption{Esquema de transformadas en FOC \cite{frick2018bldc}.}
-    \label{fig:foc_transform}
+	\centering
+	\includegraphics[width=0.8\textwidth]{imagenes/transformadas_foc.png}
+	\caption{Esquema de transformadas en FOC \cite{frick2018bldc}.}
+	\label{fig:foc_transform}
 \end{figure}
 \FloatBarrier
 
@@ -141,10 +141,10 @@ Esta técnica se basa en la transformación de las variables trifásicas del mot
 La transformada de Clarke convierte un sistema trifásico de corrientes \(ABC\) en un sistema bifásico \(\alpha-\beta\), proyectando las corrientes en un sistema de coordenadas bidimensional estacionario \cite{AN1078}.
 
 \begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.5\textwidth]{imagenes/clarke.png}
-    \caption{Transformada de Clarke \cite{AN1078}.}
-    \label{fig:clarke_transform}
+	\centering
+	\includegraphics[width=0.7\textwidth]{imagenes/clarke.png}
+	\caption{Esquema transformada de Clarke.}
+	\label{fig:clarke_transform}
 \end{figure}
 \FloatBarrier
 
@@ -152,9 +152,9 @@ La transformada de Clarke convierte un sistema trifásico de corrientes \(ABC\) 
 La transformada de Park convierte el sistema estacionario \(\alpha-\beta\) en un sistema rotatorio \(dq\), sincronizado con el rotor. Esto simplifica el análisis y control del motor al reducir la complejidad de las señales del motor \cite{AN1078}.
 
 \begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.5\textwidth]{imagenes/park.png}
-    \caption{Transformada de Park \cite{AN1078}.}
+	\centering
+	\includegraphics[width=0.7\textwidth]{imagenes/park.png}
+	\caption{Esquema transformada de Park.}
 \end{figure}
 \FloatBarrier
 
@@ -162,9 +162,9 @@ La transformada de Park convierte el sistema estacionario \(\alpha-\beta\) en un
 La transformada inversa de Park regresa el sistema rotatorio \(dq\) al marco estacionario \(\alpha-\beta\), permitiendo aplicar las señales de control al motor en su forma original \cite{AN1078}.
 
 \begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.5\textwidth]{imagenes/park_inv.png}
-    \caption{Transformada inversa de Park \cite{AN1078}.}
+	\centering
+	\includegraphics[width=0.7\textwidth]{imagenes/park_inv.png}
+	\caption{Esquema transformada inversa de Park.}
 \end{figure}
 \FloatBarrier
 
@@ -174,10 +174,34 @@ La modulación de espacio vectorial es una técnica que busca obtener los tiempo
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.5\textwidth]{imagenes/image909-0000.jpg}
-	\caption{SVM.}
+	\includegraphics[width=0.7\textwidth]{imagenes/SVM.png}
+	\caption{Esquema SVM.}
 \end{figure}
 \FloatBarrier
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.5\textwidth]{imagenes/sectantes.png}
+	\caption{Sextantes en SVM.}
+\end{figure}
+\FloatBarrier
+
+\begin{table}[htbp]
+	\centering
+	\caption{Secuencia de Conmutación de Siete Segmentos}
+	\begin{tabular}{ c c c c c c c c }
+		\hline
+		\textbf{Sector} & \textbf{1}       & \textbf{2}       & \textbf{3}       & \textbf{4}       & \textbf{5}       & \textbf{6}       & \textbf{7}       \\
+		\hline
+		I               & $\vec{V}_0(000)$ & $\vec{V}_1(100)$ & $\vec{V}_2(110)$ & $\vec{V}_0(111)$ & $\vec{V}_2(100)$ & $\vec{V}_1(100)$ & $\vec{V}_0(000)$ \\
+		II              & $\vec{V}_0(000)$ & $\vec{V}_3(010)$ & $\vec{V}_2(110)$ & $\vec{V}_0(111)$ & $\vec{V}_2(100)$ & $\vec{V}_3(010)$ & $\vec{V}_0(000)$ \\
+		III             & $\vec{V}_0(000)$ & $\vec{V}_3(010)$ & $\vec{V}_4(011)$ & $\vec{V}_0(111)$ & $\vec{V}_4(010)$ & $\vec{V}_3(010)$ & $\vec{V}_0(000)$ \\
+		IV              & $\vec{V}_0(000)$ & $\vec{V}_5(001)$ & $\vec{V}_4(011)$ & $\vec{V}_0(111)$ & $\vec{V}_4(010)$ & $\vec{V}_5(001)$ & $\vec{V}_0(000)$ \\
+		V               & $\vec{V}_0(000)$ & $\vec{V}_5(001)$ & $\vec{V}_6(001)$ & $\vec{V}_0(111)$ & $\vec{V}_6(001)$ & $\vec{V}_5(001)$ & $\vec{V}_0(000)$ \\
+		VI              & $\vec{V}_0(000)$ & $\vec{V}_1(100)$ & $\vec{V}_6(001)$ & $\vec{V}_0(111)$ & $\vec{V}_6(001)$ & $\vec{V}_1(100)$ & $\vec{V}_0(000)$ \\
+		\hline
+	\end{tabular}
+\end{table}
 
 \newpage
 \section{Motivación}
@@ -223,7 +247,6 @@ Implementar un controlador de tipo FOC (Control de Campo Orientado) para motores
 \subsection{Microcontrolador}
 
 
-
 %la idea de este capitulo es documentan el diseño duro del sistema
 \chapter{Diseño de implementación}
 \section{hardware}
@@ -234,7 +257,7 @@ Para las validaciones, se realizó una adquisición de datos, donde estos se rec
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.8\textwidth]{imagenes/Debug USB.png}
+	\includegraphics[width=\textwidth]{imagenes/Debug USB.png}
 	\caption{Diagrama de flujo adquisición de datos.}
 	\label{flujo_debug}
 \end{figure}
@@ -317,26 +340,6 @@ En la figura \ref{corrientes_dq} se pueden apreciar como las corrientes $dq$ pre
 
 \newpage
 \section{Validación de los Controladores PI}
-En esta validación se quiere ver si los controladores PI de velocidad y corriente son capaces de mantener sus set point. estas pruebas se realizaron de forma estática, aplicando un poco de carga sobre el motor y tomando una captura de datos durante esto.
-
-\subsection{Validación del controlar de velocidad}
-Para la validación se aplico un set point de 116.8 RPM con uno de los potenciómetros.
-
-\begin{figure}[ht]
-	\centering
-	\includegraphics[width=0.8\textwidth]{ruta/del/primer_grafico.png}
-	\caption{Velocidad medida por el encoder y setpoint de velocidad.}
-	\label{velocidad_encoder}
-\end{figure}
-\FloatBarrier
-
-\subsection{Validación del controlar de corriente}
-
-\section{Validación señales de Modulación}
-%aquí seria mejor comparar respecto a datos obtenidos con un analizador lógico
-
-\newpage
-\section{Validación de los Controladores PI}
 En esta validación se busca comprobar si los controladores PI de velocidad y corriente son capaces de mantener sus setpoints. Las pruebas se realizaron de forma estática, aplicando una carga ligera sobre el motor y capturando datos durante este proceso.
 
 \subsection{Validación del controlador de velocidad}
@@ -344,7 +347,7 @@ Para la validación, se aplicó un setpoint de 116.8 RPM utilizando uno de los p
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.8\textwidth]{ruta/del/primer_grafico.png}
+	\includegraphics[width=0.8\textwidth]{imagenes/CV.png}
 	\caption{Velocidad medida por el encoder y setpoint de velocidad.}
 	\label{velocidad_encoder}
 \end{figure}
@@ -356,23 +359,35 @@ En la Figura \ref{velocidad_encoder}, se observa que la velocidad medida por el 
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.8\textwidth]{ruta/del/segundo_grafico.png}
+	\includegraphics[width=0.8\textwidth]{imagenes/CV_CC.png}
 	\caption{Corrientes medidas en el plano $dq$.}
-	\label{corrientes_dq}
+	\label{cont_corrientes_dq}
 \end{figure}
 \FloatBarrier
 
-Como se muestra en la Figura \ref{corrientes_dq}, las corrientes en el plano $dq$ indican que el controlador de corriente logra mantener la corriente de cuadratura ($I_q$) cercana al valor de referencia proporcionado por el controlador de velocidad, mientras que la corriente directa ($I_d$) se mantiene próxima a cero. Esto evidencia que el controlador de corriente regula eficazmente las corrientes según los setpoints establecidos.
+Como se muestra en la Figura \ref{cont_corrientes_dq}, las corrientes en el plano $dq$ indican que el controlador de corriente logra mantener la corriente de cuadratura ($I_q$) cercana al valor de referencia proporcionado por el controlador de velocidad, mientras que la corriente directa ($I_d$) se mantiene próxima a cero. Esto evidencia que el controlador de corriente regula eficazmente las corrientes según los setpoints establecidos.
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.8\textwidth]{ruta/del/tercer_grafico.png}
+	\includegraphics[width=0.8\textwidth]{imagenes/CC_DQ.png}
 	\caption{Voltajes en el plano $dq$.}
 	\label{voltajes_dq}
 \end{figure}
 \FloatBarrier
 
 Además, la Figura \ref{voltajes_dq} presenta los voltajes en el plano $dq$, donde se aprecia que las tensiones generadas están dentro de los valores esperados para mantener las corrientes deseadas. Esto corrobora que el controlador de corriente responde adecuadamente a las demandas del sistema, contribuyendo al correcto desempeño del motor bajo condiciones de carga.
+
+\newpage
+\section{Validación señales del SVM}
+%aquí seria mejor comparar respecto a datos obtenidos con un analizador lógico
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.8\textwidth]{imagenes/señales timer.png}
+	\caption{Señales del timer.}
+	\label{señal_timer}
+\end{figure}
+\FloatBarrier
 
 \newpage
 \chapter*{Comentarios y Conclusiones}
