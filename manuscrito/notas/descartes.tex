@@ -13,6 +13,7 @@
 \usepackage{csquotes}
 \usepackage{placeins}
 \usepackage{comment}
+\usepackage{xcolor}
 
 \setlength{\parskip}{0.5em}
 
@@ -197,7 +198,7 @@ Este proyecto nace de la necesidad de un controlador para motores brushless adec
 
 %A estas señales se les aplica un filtro complementario ajustado para tener una frecuencia de corte de 12000hz para las corrientes de fase y 800hz para las corrientes directa y cuadratura.
 
-Se validara el funcionamiento y adquisición de las mediciones de corriente en fase. 
+Se validara el funcionamiento y adquisición de las mediciones de corriente en fase.
 %Lo esperable de obtener en esta medición es por una parte, en las corrieres de fase obtener 3 gráficas sinusoidales desfasadas por 120 grados con igual amplitud y frecuencia.
 
 \begin{figure}[ht]
@@ -357,15 +358,15 @@ Este es un documento de ejemplo. Aquí hay una referencia a un libro \cite{odriv
 \end{comment}
 
 \begin{comment}
-	\newpage
+\newpage
 \subsection{Transformada de Clarke}
 La transformada de Clarke es un procedimiento matemático que convierte un sistema trifásico de corrientes \(ABC\) en un sistema bifásico \(\alpha-\beta\). Esta transformación proyecta las corrientes trifásicas, referenciadas al estátor, en un sistema de coordenadas bidimensional estacionario con la misma referencia. \cite{AN1078}.
 
 \begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.5\textwidth]{imagenes/clarke.png}
-    \caption{Transformada de Clarke \cite{AN1078}.}
-    \label{fig:clarke_transform}
+	\centering
+	\includegraphics[width=0.5\textwidth]{imagenes/clarke.png}
+	\caption{Transformada de Clarke \cite{AN1078}.}
+	\label{fig:clarke_transform}
 \end{figure}
 \FloatBarrier
 
@@ -419,28 +420,34 @@ También existe la transformada inversa de Park, que permite revertir esta trans
 	$\alpha$\\
 
 
-\begin{align*}
-	\vec{V}_{\text{ref}} &= (V_{\alpha}, V_{\beta}) \\
-	\vec{V}_{\text{ref}} &= t_1\vec{V}_1 + t_2\vec{V}_2\\
-\end{align*}
-
 	\begin{align*}
-		\vec{V}_1 & = (1, 0)                                           \\
-		\vec{V}_2 & = \left(\dfrac{1}{2}, \dfrac{\sqrt{3}}{2}\right)   \\
-		\vec{V}_3 & = \left(-\dfrac{1}{2}, \dfrac{\sqrt{3}}{2}\right)  \\
-		\vec{V}_4 & = (-1, 0)                                          \\
-		\vec{V}_5 & = \left(-\dfrac{1}{2}, -\dfrac{\sqrt{3}}{2}\right) \\
-		\vec{V}_6 & = \left(\dfrac{1}{2}, -\dfrac{\sqrt{3}}{2}\right)  \\
+		\vec{V}_{\text{ref}}    & = V_{\alpha} + jV_{\beta}                             \\
+		\vec{V}_{\text{ref}}    & = \vec{V}_nt_n + \vec{V}_{n+1}t_{n+1}                 \\
+		V_{\alpha} + jV_{\beta} & = \vec{V}_nt_n + \vec{V}_{n+1}t_{n+1}                 \\
+		V_{\alpha}              & = \vec{V}_{n,\alpha}t_n + \vec{V}_{n+1,\alpha}t_{n+1} \\
+		V_{\beta}               & = \vec{V}_{n,\beta}t_n + \vec{V}_{n+1,\beta}t_{n+1}   \\
 	\end{align*}
 
-	$\vec{V}_0(000)$
-	$\vec{V}_1(001)$
-	$\vec{V}_2(011)$ \\
-	$\vec{V}_3(010)$
-	$\vec{V}_4(110)$
-	$\vec{V}_5(100)$ \\
-	$\vec{V}_6(101)$
-	$\vec{V}_7(111)$
+	\begin{center}
+		\begin{align}
+			\vec{V}_1 & = 1 \angle 0^\circ \hphantom{00} = \hphantom{-} 1 + j0                            \\
+			\vec{V}_2 & = 1 \angle 60^\circ \hphantom{0} = \hphantom{-} \frac{1}{2} + j\frac{\sqrt{3}}{2} \\
+			\vec{V}_3 & = 1 \angle 120^\circ = -\frac{1}{2} + j\frac{\sqrt{3}}{2}                         \\
+			\vec{V}_4 & = 1 \angle 180^\circ = -1 + j0                                                    \\
+			\vec{V}_5 & = 1 \angle 240^\circ = -\frac{1}{2} - j\frac{\sqrt{3}}{2}                         \\
+			\vec{V}_6 & = 1 \angle 300^\circ = \hphantom{-} \frac{1}{2} - j\frac{\sqrt{3}}{2}
+		\end{align}
+	\end{center}
+
+
+	$\vec{V}_0(000)$ 
+	$\vec{V}_1(100)$ 
+	$\vec{V}_2(110)$ \\
+	$\vec{V}_3(010)$ 
+	$\vec{V}_4(011)$ 
+	$\vec{V}_5(001)$ \\
+	$\vec{V}_6(101)$ 
+	$\vec{V}_7(111)$ 
 
 	Sector 1
 	Sector 2
@@ -449,6 +456,116 @@ También existe la transformada inversa de Park, que permite revertir esta trans
 	Sector 5
 	Sector 6
 
+	\begin{table}[htbp]
+		\centering
+		\caption{Secuencia de Conmutación de Siete Segmentos}
+		\begin{tabular}{ c c c c c c c c }
+			\hline
+			\textbf{Sector} & \textbf{1}       & \textbf{2}       & \textbf{3}       & \textbf{4}       & \textbf{5}       & \textbf{6}       & \textbf{7}       \\
+			\hline
+			I               & $\vec{V}_0(000)$ & $\vec{V}_1(100)$ & $\vec{V}_2(110)$ & $\vec{V}_7(111)$ & $\vec{V}_2(110)$ & $\vec{V}_1(100)$ & $\vec{V}_0(000)$ \\
+			II              & $\vec{V}_0(000)$ & $\vec{V}_3(010)$ & $\vec{V}_2(110)$ & $\vec{V}_7(111)$ & $\vec{V}_2(110)$ & $\vec{V}_3(010)$ & $\vec{V}_0(000)$ \\
+			III             & $\vec{V}_0(000)$ & $\vec{V}_3(010)$ & $\vec{V}_4(011)$ & $\vec{V}_7(111)$ & $\vec{V}_4(011)$ & $\vec{V}_3(010)$ & $\vec{V}_0(000)$ \\
+			IV              & $\vec{V}_0(000)$ & $\vec{V}_5(001)$ & $\vec{V}_4(011)$ & $\vec{V}_7(111)$ & $\vec{V}_4(011)$ & $\vec{V}_5(001)$ & $\vec{V}_0(000)$ \\
+			V               & $\vec{V}_0(000)$ & $\vec{V}_5(001)$ & $\vec{V}_6(101)$ & $\vec{V}_7(111)$ & $\vec{V}_6(101)$ & $\vec{V}_5(001)$ & $\vec{V}_0(000)$ \\
+			VI              & $\vec{V}_0(000)$ & $\vec{V}_1(100)$ & $\vec{V}_6(101)$ & $\vec{V}_7(111)$ & $\vec{V}_6(101)$ & $\vec{V}_1(100)$ & $\vec{V}_0(000)$ \\
+			\hline
+		\end{tabular}
+	\end{table}
+
 \end{center}
+
+
+
+
+\begin{table}[htbp]
+	\centering
+	\caption{Secuencia de Conmutación de Siete Segmentos}
+	\begin{tabular}{c c c c c c c c c }
+		\hline
+		\textbf{Sextante} &   & \textbf{1}  & \textbf{2}  & \textbf{3}  & \textbf{4}  & \textbf{5}  & \textbf{6}  & \textbf{7}  \\
+		\hline
+		I                 &   & $\vec{V}_0$ & $\vec{V}_1$ & $\vec{V}_2$ & $\vec{V}_7$ & $\vec{V}_2$ & $\vec{V}_1$ & $\vec{V}_0$ \\
+		                  & A & $0$         & $1$         & $1$         & $1$         & $1$         & $1$         & $0$         \\
+		                  & B & $0$         & $0$         & $1$         & $1$         & $1$         & $0$         & $0$         \\
+		                  & C & $0$         & $0$         & $0$         & $1$         & $0$         & $0$         & $0$         \\
+		\hline
+		II                &   & $\vec{V}_0$ & $\vec{V}_3$ & $\vec{V}_2$ & $\vec{V}_7$ & $\vec{V}_2$ & $\vec{V}_3$ & $\vec{V}_0$ \\
+		                  & A & $0$         & $0$         & $1$         & $1$         & $1$         & $0$         & $0$         \\
+		                  & B & $0$         & $1$         & $1$         & $1$         & $1$         & $1$         & $0$         \\
+		                  & C & $0$         & $0$         & $0$         & $1$         & $0$         & $0$         & $0$         \\
+		\hline
+		III               &   & $\vec{V}_0$ & $\vec{V}_3$ & $\vec{V}_4$ & $\vec{V}_7$ & $\vec{V}_4$ & $\vec{V}_3$ & $\vec{V}_0$ \\
+		                  & A & $0$         & $0$         & $0$         & $1$         & $0$         & $0$         & $0$         \\
+		                  & B & $0$         & $1$         & $1$         & $1$         & $1$         & $1$         & $0$         \\
+		                  & C & $0$         & $0$         & $1$         & $1$         & $1$         & $0$         & $0$         \\
+		\hline
+		IV                &   & $\vec{V}_0$ & $\vec{V}_5$ & $\vec{V}_4$ & $\vec{V}_7$ & $\vec{V}_4$ & $\vec{V}_5$ & $\vec{V}_0$ \\
+		                  & A & $0$         & $0$         & $0$         & $1$         & $0$         & $0$         & $0$         \\
+		                  & B & $0$         & $0$         & $1$         & $1$         & $1$         & $0$         & $0$         \\
+		                  & C & $0$         & $1$         & $1$         & $1$         & $1$         & $1$         & $0$         \\
+		\hline
+		V                 &   & $\vec{V}_0$ & $\vec{V}_5$ & $\vec{V}_6$ & $\vec{V}_7$ & $\vec{V}_6$ & $\vec{V}_5$ & $\vec{V}_0$ \\
+		                  & A & $0$         & $0$         & $1$         & $1$         & $1$         & $0$         & $0$         \\
+		                  & B & $0$         & $0$         & $0$         & $1$         & $0$         & $0$         & $0$         \\
+		                  & C & $0$         & $1$         & $1$         & $1$         & $1$         & $1$         & $0$         \\
+		\hline
+		VI                &   & $\vec{V}_0$ & $\vec{V}_1$ & $\vec{V}_6$ & $\vec{V}_7$ & $\vec{V}_6$ & $\vec{V}_1$ & $\vec{V}_0$ \\
+		                  & A & $0$         & $1$         & $1$         & $1$         & $1$         & $1$         & $0$         \\
+		                  & B & $0$         & $0$         & $0$         & $1$         & $0$         & $0$         & $0$         \\
+		                  & C & $0$         & $0$         & $1$         & $1$         & $1$         & $0$         & $0$         \\
+		\hline
+	\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+    \centering
+    \caption{Secuencia de Conmutación de Siete Segmentos}
+    \begin{tabular}{c c c c c c c c c }
+        \hline
+        \textbf{Sextante} &   & \textbf{1}  & \textbf{2}  & \textbf{3}  & \textbf{4}  & \textbf{5}  & \textbf{6}  & \textbf{7}  \\
+        \hline
+        I                 &   & $\vec{V}_0$ & $\vec{V}_1$ & $\vec{V}_2$ & $\vec{V}_7$ & $\vec{V}_2$ & $\vec{V}_1$ & $\vec{V}_0$ \\
+                          & A & \textcolor{gray}{0}         & \textbf{1}         & \textbf{1}         & \textbf{1}         & \textbf{1}         & \textbf{1}         & \textcolor{gray}{0}         \\
+                          & B & \textcolor{gray}{0}         & \textcolor{gray}{0}         & \textbf{1}         & \textbf{1}         & \textbf{1}         & \textcolor{gray}{0}         & \textcolor{gray}{0}         \\
+                          & C & \textcolor{gray}{0}         & \textcolor{gray}{0}         & \textcolor{gray}{0}         & \textbf{1}         & \textcolor{gray}{0}         & \textcolor{gray}{0}         & \textcolor{gray}{0}         \\
+        \hline
+        II                &   & $\vec{V}_0$ & $\vec{V}_3$ & $\vec{V}_2$ & $\vec{V}_7$ & $\vec{V}_2$ & $\vec{V}_3$ & $\vec{V}_0$ \\
+                          & A & \textcolor{gray}{0}         & \textcolor{gray}{0}         & \textbf{1}         & \textbf{1}         & \textbf{1}         & \textcolor{gray}{0}         & \textcolor{gray}{0}         \\
+                          & B & \textcolor{gray}{0}         & \textbf{1}         & \textbf{1}         & \textbf{1}         & \textbf{1}         & \textbf{1}         & \textcolor{gray}{0}         \\
+                          & C & \textcolor{gray}{0}         & \textcolor{gray}{0}         & \textcolor{gray}{0}         & \textbf{1}         & \textcolor{gray}{0}         & \textcolor{gray}{0}         & \textcolor{gray}{0}         \\
+        \hline
+        III               &   & $\vec{V}_0$ & $\vec{V}_3$ & $\vec{V}_4$ & $\vec{V}_7$ & $\vec{V}_4$ & $\vec{V}_3$ & $\vec{V}_0$ \\
+                          & A & \textcolor{gray}{0}         & \textcolor{gray}{0}         & \textcolor{gray}{0}         & \textbf{1}         & \textcolor{gray}{0}         & \textcolor{gray}{0}         & \textcolor{gray}{0}         \\
+                          & B & \textcolor{gray}{0}         & \textbf{1}         & \textbf{1}         & \textbf{1}         & \textbf{1}         & \textbf{1}         & \textcolor{gray}{0}         \\
+                          & C & \textcolor{gray}{0}         & \textcolor{gray}{0}         & \textbf{1}         & \textbf{1}         & \textbf{1}         & \textcolor{gray}{0}         & \textcolor{gray}{0}         \\
+        \hline
+        IV                &   & $\vec{V}_0$ & $\vec{V}_5$ & $\vec{V}_4$ & $\vec{V}_7$ & $\vec{V}_4$ & $\vec{V}_5$ & $\vec{V}_0$ \\
+                          & A & \textcolor{gray}{0}         & \textcolor{gray}{0}         & \textcolor{gray}{0}         & \textbf{1}         & \textcolor{gray}{0}         & \textcolor{gray}{0}         & \textcolor{gray}{0}         \\
+                          & B & \textcolor{gray}{0}         & \textcolor{gray}{0}         & \textbf{1}         & \textbf{1}         & \textbf{1}         & \textcolor{gray}{0}         & \textcolor{gray}{0}         \\
+                          & C & \textcolor{gray}{0}         & \textbf{1}         & \textbf{1}         & \textbf{1}         & \textbf{1}         & \textbf{1}         & \textcolor{gray}{0}         \\
+        \hline
+        V                 &   & $\vec{V}_0$ & $\vec{V}_5$ & $\vec{V}_6$ & $\vec{V}_7$ & $\vec{V}_6$ & $\vec{V}_5$ & $\vec{V}_0$ \\
+                          & A & \textcolor{gray}{0}         & \textcolor{gray}{0}         & \textbf{1}         & \textbf{1}         & \textbf{1}         & \textcolor{gray}{0}         & \textcolor{gray}{0}         \\
+                          & B & \textcolor{gray}{0}         & \textcolor{gray}{0}         & \textcolor{gray}{0}         & \textbf{1}         & \textcolor{gray}{0}         & \textcolor{gray}{0}         & \textcolor{gray}{0}         \\
+                          & C & \textcolor{gray}{0}         & \textbf{1}         & \textbf{1}         & \textbf{1}         & \textbf{1}         & \textbf{1}         & \textcolor{gray}{0}         \\
+        \hline
+        VI                &   & $\vec{V}_0$ & $\vec{V}_1$ & $\vec{V}_6$ & $\vec{V}_7$ & $\vec{V}_6$ & $\vec{V}_1$ & $\vec{V}_0$ \\
+                          & A & \textcolor{gray}{0}         & \textbf{1}         & \textbf{1}         & \textbf{1}         & \textbf{1}         & \textbf{1}         & \textcolor{gray}{0}         \\
+                          & B & \textcolor{gray}{0}         & \textcolor{gray}{0}         & \textcolor{gray}{0}         & \textbf{1}         & \textcolor{gray}{0}         & \textcolor{gray}{0}         & \textcolor{gray}{0}         \\
+                          & C & \textcolor{gray}{0}         & \textcolor{gray}{0}         & \textbf{1}         & \textbf{1}         & \textbf{1}         & \textcolor{gray}{0}         & \textcolor{gray}{0}         \\
+        \hline
+    \end{tabular}
+\end{table}
+
+%El control FOC es una de las técnicas más utilizadas para el control de motores \textit{brushless} en robótica, debido a que ofrece una alta eficiencia, un bajo rizado de torque y una gran precisión en el control del motor \cite{Garca2011ComparisonBF}\cite{juanpere_tecnicas}.
+
+%El control orientado de campo se basa en desacoplar el flujo electromagnético del par motor, permitiendo el control independiente de cada uno. Este desacoplamiento se logra mediante la transformación de las variables trifásicas del motor, que están en un marco de referencia estacionario \(ABC\), hacia un marco de referencia rotatorio \(dq\) que gira síncronamente con el rotor.
+
+%Esta técnica se basa en la transformación de las variables trifásicas del motor, que se encuentran en un marco de referencia estático, hacia un marco de referencia rotacional que gira de manera síncrona con el rotor del motor. Al realizar esta transformación, es posible convertir variables que tienen un comportamiento ondulatorio en el tiempo en variables con un comportamiento lineal. Esto se logra mediante la aplicación de la transformada de Clarke y la transformada de Park.
+
+%La transformación del marcos de referencia se logra al aplicar la transformada de Clarke y la transformada de Park, de esta forma las variables que presentan un comportamiento ondulatorio en el tiempo se convierten en variables de corriente continua que emula de cierta forma el comportamiento de un motor con escobillas.
+
+%La transformada de Clarke convierte un sistema trifásico de corrientes \(ABC\) en un sistema bifásico $\alpha$-$\beta$, proyectando las corrientes en un sistema de coordenadas bidimensional estacionario \cite{AN1078}.
 
 \end{document}

@@ -116,68 +116,79 @@ Este proyecto presenta la implementación y validación de un controlador de cam
 \newpage
 \section{Marco teórico}
 \subsection{Motores \textit{brushless}}
-Los motores \textit{brushless} (BLDC), o motores sin escobillas de corriente continua, son dispositivos en los que el embobinado se encuentra en el estátor, mientras que el rotor contiene los imanes permanentes.
-
-Estos motores se destacan por ofrecer una mayor densidad de potencia en comparación con los motores de escobillas. Sin embargo, dicha ventaja implica una mayor complejidad, ya que requieren un controlador electrónico que se encargue de la conmutación de las fases del embobinado para generar el movimiento del rotor.
-
-Los motores \textit{brushless} tienen tres fases que pueden ser energizadas de manera positiva o negativa, lo que genera ocho posibles configuraciones de polarización. De estas, dos son configuraciones nulas, lo que deja seis combinaciones útiles para el control del movimiento. Estas seis configuraciones son la base de uno de los métodos de control más sencillos, conocido como control trapezoidal o de seis pasos. Este método se limita a conmutar las seis polarizaciones en secuencia para completar un ciclo de rotación. No obstante, este enfoque sacrifica eficiencia y produce un rizado de torque considerable \cite{fisher2014high_STEP} \cite{juanpere_tecnicas}.
-
-\newpage
-\subsection{Control Orientado de Campo (FOC)}
-El control FOC es una de las técnicas más utilizadas para el control de motores \textit{brushless} en robótica, debido a que ofrece una alta eficiencia, un bajo rizado de torque y una gran precisión en el control del motor \cite{Garca2011ComparisonBF}\cite{juanpere_tecnicas}.
+Los motores \textit{brushless}, o motores sin escobillas de corriente continua (BLDC), son un tipo de motores trifásicos síncronos que utilizan imanes permanentes en el rotor y bobinas en el estátor, el cual está formado por un núcleo de hierro laminado. A diferencia de los motores de corriente continua con escobillas, los BLDC no emplean elementos mecánicos para conmutar la corriente en las bobinas. En su lugar, esta conmutación se realiza mediante un controlador electrónico \cite{frick2018bldc}, eliminando el rozamiento y el desgaste asociados a las escobillas, lo que mejora la eficiencia del sistema.
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.8\textwidth]{imagenes/transformadas_foc.png}
-	\caption{Esquema de transformadas en FOC \cite{frick2018bldc}.}
+	\includegraphics[width=0.6\textwidth]{imagenes/OUT_IN_BLDC_SF}
+	\caption{Esquema de motores sin escobillas (\textit{BLDC}).}
+	\label{fig:motor_sin_escobillas}
+\end{figure}
+\FloatBarrier
+
+Similar a los motores trifásicos de corriente alterna, estos pueden tener configuraciones de bobinado en delta o estrella \cite{Millet2022}. Además, pueden presentar configuraciones \textit{in-runner}, donde los imanes están en el centro del eje con las bobinas en el exterior, o configuraciones \textit{out-runner} , donde los imanes se encuentran por fuera del motor, mientras que las bobinas están en el centro \cite{9774372}. Estos motores, al requerir una sincronización entre el campo magnético del estátor y el campo magnético del rotor, suelen utilizar encoders o sensores de efecto Hall para obtener información sobre la posición del eje y, de este modo, mantener una conmutación adecuada. No obstante, también es posible emplear técnicas \textit{sensorless} (sin sensor) para estimar la posición del rotor sin necesidad de sensores físicos. \cite{Gualtieri2018_STEP}
+
+Los \textit{BLDC} se destacan por ofrecer una mayor densidad de potencia, mayor torque, mejor eficiencias y pueden llegar a velocidades mas altas. Sin embargo, al requerir de un controlador electrónico que se encargue de la conmutación para generar el movimiento del rotor, la complejidad y los costos asociados a su implementación son mayores. \cite{AN885}
+
+\newpage
+\subsection{Control Orientado de Campo (FOC)}
+El control orientado de campo se basa en desacoplar el flujo electromagnético del par motor, permitiendo el control independiente de cada uno. Este desacoplamiento se logra mediante la transformación de las variables trifásicas del motor, que están en un marco de referencia estacionario \(ABC\), hacia un marco de referencia rotatorio \(dq\) que gira síncronamente con el rotor. \cite{power_conv_14}
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.9\textwidth]{imagenes/simpleFOC.jpg}
+	\caption{Diagrama de flujo del control FOC.\cite{Skuric_SimpleFOC_A_Field_2022}}
 	\label{fig:foc_transform}
 \end{figure}
 \FloatBarrier
 
-Esta técnica se basa en la transformación de las variables trifásicas del motor, que se encuentran en un marco de referencia estático, hacia un marco de referencia rotacional que gira de manera síncrona con el rotor del motor. Al realizar esta transformación, es posible convertir variables que tienen un comportamiento ondulatorio en el tiempo en variables con un comportamiento lineal. Esto se logra mediante la aplicación de la transformada de Clarke y la transformada de Park.
+La transformación entre los marcos de referencia se realiza aplicando la transformada de Clarke y la transformada de Park. De esta forma, las variables que presentan un comportamiento oscilatorio en el tiempo se convierten en variables de corriente continua, lo que permite emular, en cierta medida, el funcionamiento de un motor con escobillas a nivel de controladores. \cite{power_conv_14}
 
-\newpage
 \subsection{Transformada de Clarke}
-La transformada de Clarke convierte un sistema trifásico de corrientes \(ABC\) en un sistema bifásico \(\alpha-\beta\), proyectando las corrientes en un sistema de coordenadas bidimensional estacionario \cite{AN1078}.
+La transformada de Clarke convierte un sistema trifásico de corrientes \(ABC\) en un sistema bifásico \(\alpha\beta\), proyectando las corrientes en un sistema de coordenadas bidimensional estacionario. Esta transformación simplifica el análisis al reducir las tres corrientes de fase a dos componentes ortogonales, manteniendo la información esencial del sistema original. \cite{AN1078}
+
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.7\textwidth]{imagenes/clarke.png}
+	\includegraphics[width=0.8\textwidth]{imagenes/clarke.png}
 	\caption{Esquema transformada de Clarke.}
 	\label{fig:clarke_transform}
 \end{figure}
 \FloatBarrier
 
+\newpage
 \subsection{Transformada de Park}
-La transformada de Park convierte el sistema estacionario \(\alpha-\beta\) en un sistema rotatorio \(dq\), sincronizado con el rotor. Esto simplifica el análisis y control del motor al reducir la complejidad de las señales del motor \cite{AN1078}.
+La transformada de Park convierte el sistema en el marco de referencia estacionario \(\alpha\beta\) en el sistema en el marco de referencia rotatorio \(dq\) sincronizado con el rotor del motor. \cite{AN1078}
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.7\textwidth]{imagenes/park.png}
+	\includegraphics[width=0.8\textwidth]{imagenes/park.png}
 	\caption{Esquema transformada de Park.}
 \end{figure}
 \FloatBarrier
 
 \subsection{Transformada inversa de Park}
-La transformada inversa de Park regresa el sistema rotatorio \(dq\) al marco estacionario \(\alpha-\beta\), permitiendo aplicar las señales de control al motor en su forma original \cite{AN1078}.
+La transformada inversa de Park convierte el sistema en el marco de referencia rotatorio \(dq\) de vuelta al marco de referencia estacionario \(\alpha\beta\). \cite{AN1078}.
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.7\textwidth]{imagenes/park_inv.png}
+	\includegraphics[width=0.8\textwidth]{imagenes/park_inv.png}
 	\caption{Esquema transformada inversa de Park.}
 \end{figure}
 \FloatBarrier
 
-
+\newpage
 \subsection{Modulación de Espacio Vectorial (SVM)}
-La modulación de espacio vectorial es una técnica que busca obtener los tiempos de activación para cada embobinado del motor con el fin de ‘sintetizar’ un vector intermedio en el campo electromagnético del estátor.
+La Modulación por Vector Espacial (SVM) es una técnica utilizada para el control digital de inversores de voltaje. Representa los estados de conmutación del inversor como vectores de voltaje en el plano $\alpha$-$\beta$, formando un hexágono regular dividido en seis sectores o sextantes.
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.7\textwidth]{imagenes/SVM.png}
+	\includegraphics[width=0.6\textwidth]{imagenes/SVM.png}
 	\caption{Esquema SVM.}
 \end{figure}
 \FloatBarrier
+
+Esta técnica busca sintetizar el vector de referencia $\mathbf{V}_{\text{ref}}=(V_{\alpha},V_{\beta})$ mediante una suma ponderada de los vectores de voltaje adyacentes en el sextante donde se encuentre, logrando una aproximación más precisa de la señal deseada.
 
 \begin{figure}[ht]
 	\centering
@@ -186,22 +197,25 @@ La modulación de espacio vectorial es una técnica que busca obtener los tiempo
 \end{figure}
 \FloatBarrier
 
+Se utiliza un patrón de activación específico que permite minimizar la frecuencia de conmutación de los transistores, aprovechando estados redundantes para reducir las pérdidas asociadas a la conmutación y mejorar la eficiencia del sistema. \cite{power_conv_06}
+
 \begin{table}[htbp]
 	\centering
-	\caption{Secuencia de Conmutación de Siete Segmentos}
+	\caption{Secuencia de Conmutación en SVM}
 	\begin{tabular}{ c c c c c c c c }
 		\hline
 		\textbf{Sector} & \textbf{1}       & \textbf{2}       & \textbf{3}       & \textbf{4}       & \textbf{5}       & \textbf{6}       & \textbf{7}       \\
 		\hline
-		I               & $\vec{V}_0(000)$ & $\vec{V}_1(100)$ & $\vec{V}_2(110)$ & $\vec{V}_0(111)$ & $\vec{V}_2(100)$ & $\vec{V}_1(100)$ & $\vec{V}_0(000)$ \\
-		II              & $\vec{V}_0(000)$ & $\vec{V}_3(010)$ & $\vec{V}_2(110)$ & $\vec{V}_0(111)$ & $\vec{V}_2(100)$ & $\vec{V}_3(010)$ & $\vec{V}_0(000)$ \\
-		III             & $\vec{V}_0(000)$ & $\vec{V}_3(010)$ & $\vec{V}_4(011)$ & $\vec{V}_0(111)$ & $\vec{V}_4(010)$ & $\vec{V}_3(010)$ & $\vec{V}_0(000)$ \\
-		IV              & $\vec{V}_0(000)$ & $\vec{V}_5(001)$ & $\vec{V}_4(011)$ & $\vec{V}_0(111)$ & $\vec{V}_4(010)$ & $\vec{V}_5(001)$ & $\vec{V}_0(000)$ \\
-		V               & $\vec{V}_0(000)$ & $\vec{V}_5(001)$ & $\vec{V}_6(001)$ & $\vec{V}_0(111)$ & $\vec{V}_6(001)$ & $\vec{V}_5(001)$ & $\vec{V}_0(000)$ \\
-		VI              & $\vec{V}_0(000)$ & $\vec{V}_1(100)$ & $\vec{V}_6(001)$ & $\vec{V}_0(111)$ & $\vec{V}_6(001)$ & $\vec{V}_1(100)$ & $\vec{V}_0(000)$ \\
+		I               & $\vec{V}_0(000)$ & $\vec{V}_1(100)$ & $\vec{V}_2(110)$ & $\vec{V}_7(111)$ & $\vec{V}_2(110)$ & $\vec{V}_1(100)$ & $\vec{V}_0(000)$ \\
+		II              & $\vec{V}_0(000)$ & $\vec{V}_3(010)$ & $\vec{V}_2(110)$ & $\vec{V}_7(111)$ & $\vec{V}_2(110)$ & $\vec{V}_3(010)$ & $\vec{V}_0(000)$ \\
+		III             & $\vec{V}_0(000)$ & $\vec{V}_3(010)$ & $\vec{V}_4(011)$ & $\vec{V}_7(111)$ & $\vec{V}_4(011)$ & $\vec{V}_3(010)$ & $\vec{V}_0(000)$ \\
+		IV              & $\vec{V}_0(000)$ & $\vec{V}_5(001)$ & $\vec{V}_4(011)$ & $\vec{V}_7(111)$ & $\vec{V}_4(011)$ & $\vec{V}_5(001)$ & $\vec{V}_0(000)$ \\
+		V               & $\vec{V}_0(000)$ & $\vec{V}_5(001)$ & $\vec{V}_6(101)$ & $\vec{V}_7(111)$ & $\vec{V}_6(101)$ & $\vec{V}_5(001)$ & $\vec{V}_0(000)$ \\
+		VI              & $\vec{V}_0(000)$ & $\vec{V}_1(100)$ & $\vec{V}_6(101)$ & $\vec{V}_7(111)$ & $\vec{V}_6(101)$ & $\vec{V}_1(100)$ & $\vec{V}_0(000)$ \\
 		\hline
 	\end{tabular}
 \end{table}
+%cuarto párrafo
 
 \newpage
 \section{Motivación}
@@ -257,7 +271,7 @@ Para las validaciones, se realizó una adquisición de datos, donde estos se rec
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=\textwidth]{imagenes/Debug USB.png}
+	\includegraphics[width=0.76\textwidth]{imagenes/Debug USB.png}
 	\caption{Diagrama de flujo adquisición de datos.}
 	\label{flujo_debug}
 \end{figure}
@@ -355,6 +369,7 @@ Para la validación, se aplicó un setpoint de 116.8 RPM utilizando uno de los p
 
 En la Figura \ref{velocidad_encoder}, se observa que la velocidad medida por el encoder sigue adecuadamente el setpoint establecido de 116.8 RPM. A pesar de ligeras oscilaciones, el controlador de velocidad mantiene el régimen deseado, demostrando su capacidad para alcanzar y mantener el setpoint bajo condiciones de carga estática.
 
+\newpage
 \subsection{Validación del controlador de corriente}
 
 \begin{figure}[ht]
@@ -379,15 +394,18 @@ Además, la Figura \ref{voltajes_dq} presenta los voltajes en el plano $dq$, don
 
 \newpage
 \section{Validación señales del SVM}
-%aquí seria mejor comparar respecto a datos obtenidos con un analizador lógico
+
+Para validar el funcionamiento del modulador por vector espacial (SVM), se realizaron pruebas virtuales aplicando diferentes valores de tensión de referencia $V_{\text{ref}}$ al SVM para observar su comportamiento. Durante estas pruebas, se utilizó un analizador lógico para capturar las señales PWM generadas por el microcontrolador. En la captura presentada, se aisló un ciclo completo del PWM donde se puede apreciar de forma clara la secuencia de activación correspondiente al sector 1.
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.8\textwidth]{imagenes/señales timer.png}
+	\includegraphics[width=0.9\textwidth]{imagenes/señales timer.png}
 	\caption{Señales del timer.}
 	\label{señal_timer}
 \end{figure}
 \FloatBarrier
+
+En la Figura \ref{señal_timer}, se observan las señales PWM correspondientes a las tres fases generadas por el microcontrolador. La secuencia de activación muestra que el SVM implementado sigue correctamente el patrón teórico esperado para el sector 1, evidenciando una conmutación precisa y sincronizada de los transistores del inversor. Esto confirma que el SVM está modulando adecuadamente las señales PWM para generar los vectores de tensión requeridos.
 
 \newpage
 \chapter*{Comentarios y Conclusiones}
