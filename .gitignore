@@ -10,6 +10,8 @@
 *.run.xml
 *.synctex.*
 *.toc
+*.lof
+*.lot
 Hardware/*/*.b#*
 Hardware/*/*.s#*
 *.Identifier
