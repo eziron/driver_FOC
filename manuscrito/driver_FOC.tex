@@ -18,7 +18,7 @@
 \setlength{\parskip}{0.5em}
 
 \usepackage[style=numeric,sorting=none]{biblatex}
-\addbibresource{referencias.bib} 
+\addbibresource{referencias.bib}
 
 \onehalfspacing
 \renewcommand{\familydefault}{\sfdefault}
@@ -84,7 +84,7 @@
 		\large PROFESOR GUÍA:\\
 		\large ANGEL ERNESTO RUBIO\\[1cm]
 		\large PROFESORES GUÍA ADJUNTO:\\
-		\large PEDRO \href{https://youtu.be/UJwA7hu3aug?si=OvcJZs2QosQupum7&t=50}{MELIN} COLINA
+		\large PEDRO \href{https://youtu.be/UJwA7hu3aug?si=OvcJZs2QosQupum7&t=50}{MELIN} COLOMA
 	\end{center}
 \end{titlepage}
 
@@ -105,47 +105,47 @@
 \chapter*{Resumen}
 \addcontentsline{toc}{chapter}{Resumen}
 
-Este trabajo aborda el diseñó e implementación de un controlador de campo orientado (\emph{FOC}) para motores \emph{brushless} de corriente continua, incorporando un \emph{encoder} para la medición de la posición. En primera instancia, se revisan los fundamentos teóricos que sustentan la técnica \emph{FOC}, destacando su dad para desacoplar el flujo magnético del par motor, y la relevancia de las transformadas de Clarke y Park para simplificar el control de las corrientes en el estátor. Asimismo, se incluyen los conceptos principales de la Modulación por Vector Espacial (\emph{SVM}), esencial para la síntesis de las señales de salida del inversor.
+Este trabajo aborda el diseño e implementación de un controlador de campo orientado (\emph{FOC}) para motores \emph{brushless} de corriente continua, incorporando un \emph{encoder} para la medición de la posición. En primera instancia, se revisan los fundamentos teóricos que sustentan la técnica \emph{FOC}, destacando su capacidad para desacoplar el flujo magnético del par motor, y la relevancia de las transformadas de Clarke y Park para simplificar el control de las corrientes en el estátor. Asimismo, se incluyen los conceptos principales de la Modulación por Vector Espacial (\emph{SVM}), esencial para la síntesis de las señales de salida del inversor.
 
-Posteriormente, se detalla el diseñó y la fabricación del \emph{hardware} de la solución, que comprende un inversor trifásico basado en MOSFETs, controladores de puerta (\emph{gate drivers}) y sensores de corriente de tipo \emph{shunt}, junto con los elementos de filtrado y protección necesarios. Se selecciona y acondiciona un motor \emph{brushless}, al cual se integra un \emph{encoder} magnético para la obtención de la posición del rotor. Además, se documentan los procesos de elaboración de la PCB y la disposición de sus pistas para manejar corrientes elevadas, considerando la disipación y la estabilidad del sistema.
+Posteriormente, se detalla el diseño y la fabricación del \emph{hardware} de la solución, que comprende un inversor trifásico basado en MOSFETs, controladores de puerta (\emph{gate drivers}) y sensores de corriente de tipo \emph{shunt}, junto con los elementos de filtrado y protección necesarios. Se selecciona y acondiciona un motor \emph{brushless}, al cual se integra un \emph{encoder} magnético para la obtención de la posición del rotor. Además, se documentan los procesos de elaboración de la PCB y la disposición de sus pistas para manejar corrientes elevadas, considerando la disipación y la estabilidad del sistema.
 
 En el ámbito del \emph{firmware}, se describen las estrategias de configuración de los periféricos del microcontrolador STM32, haciendo uso de \emph{STM32CubeMX} para la inicialización de temporizadores y convertidores A/D (\emph{ADC}). Se explica el flujo de ejecución principal y la rutina de interrupción encargada de efectuar la lectura de sensores, la aplicación de las transformadas de Clarke y Park, los controladores de corriente y velocidad, así como la generación de las señales PWM mediante \emph{SVM}.
 
-Para validar el rendimiento del controlador, se efectúan pruebas de velocidad y par bajo distintas condiciones de carga, analizando la estabilidad de las corrientes y la rapidez de respuesta ante cambios en la referencia. Asimismo, se capturan datos en tiempo real para su posterior evaluación, confirmando que la implementación logra un control estable y preciso del motor. Se identifican, no obstante, algunos retos en escenarios extremos, motivando la propuesta de futuras mejoras en el diseñó.
+Para validar el rendimiento del controlador, se efectúan pruebas de velocidad y par bajo distintas condiciones de carga, analizando la estabilidad de las corrientes y la rapidez de respuesta ante cambios en la referencia. Asimismo, se capturan datos en tiempo real para su posterior evaluación, confirmando que la implementación logra un control estable y preciso del motor. Se identifican, no obstante, algunos retos en escenarios extremos, motivando la propuesta de futuras mejoras en el diseño.
 
-En síntesis, la solución presentada demuestra la factibilidad de implantar un controlador \emph{FOC} de altas prestaciones utilizando un STM32 de la serie H7, combinando técnicas de transformación en el dominio rotatorio y \emph{SVM} en el lazo de control. Las observaciones obtenidas abren la puerta a nuevas optimizaciones, tanto en el \emph{hardware} (filtrado, disipación y protección) como en el \emph{firmware} (estructuras de software, algoritmos de compensación y sistemas operativos en tiempo real), facilitando así el despliegue de aplicaciones en robótica competitiva y sistemas embebidos.
+En síntesis, la solución presentada demuestra la factibilidad de implementar un controlador \emph{FOC} de altas prestaciones utilizando un STM32 de la serie H7, combinando técnicas de transformación en el dominio rotatorio y \emph{SVM} en el lazo de control. Las observaciones obtenidas abren la puerta a nuevas optimizaciones, tanto en el \emph{hardware} (filtrado, disipación y protección) como en el \emph{firmware} (estructuras de software, algoritmos de compensación y sistemas operativos en tiempo real), facilitando así el despliegue de aplicaciones en robótica competitiva y sistemas embebidos.
 
 \newpage
 \chapter{Introducción}
 \section{Introducción general}
 Cuando se habla de motores eléctricos de corriente continua, los motores sin escobillas destacan por su alto desempeño, siendo la opción preferida en aplicaciones como vehículos eléctricos, drones, robótica avanzada y robótica industrial.
 
-Para los motores \textit{brushless}, existe una gran variedad de técnicas de control. Algunas de las más relevantes son el control trapezoidal, utilizado mayormente en drones. El control directo de torque (DTC), empleado principalmente en motores de media y alta potencia en ambientes industriales. y el control FOC, que se aplica mayormente en robótica. En este documento, se tratará únicamente esta última técnica.
+Para los motores \textit{brushless}, existe una gran variedad de técnicas de control. Algunas de las más relevantes son el control trapezoidal, utilizado mayormente en drones; el control directo de torque (DTC), empleado principalmente en motores de media y alta potencia en ambientes industriales; y el control FOC, que se aplica mayormente en robótica. En este documento, se tratará únicamente esta última técnica.
 
-Existen tres aspectos clave que diferencian cada técnica: el rizado de torque, el costo computacional y la complejidad del hardware necesario para su ejecución. En estos aspectos, el control FOC es uno de los que produce menor rizado de torque, aunque requiere un mayor coste computacional y hardware especializado.
+Existen tres aspectos clave que diferencian cada técnica: el rizado de torque, el coste computacional y la complejidad del hardware necesario para su ejecución. En estos aspectos, el control FOC es uno de los que produce menor rizado de torque, aunque requiere un mayor coste computacional y hardware especializado.
 
-Este proyecto presenta la implementación y validación de un controlador de campo orientado (FOC) para motores sin escobillas de corriente continua (BLDC). Además, se desarrolló la placa controladora utilizando un Microcontrolador STM32 como núcleo principal.
+Este proyecto presenta la implementación y validación de un controlador de campo orientado (FOC) para motores sin escobillas de corriente continua (BLDC). Además, se desarrolló la placa controladora utilizando un microcontrolador STM32 como núcleo principal.
 
 \newpage
 \section{Marco teórico}
 \subsection{Motores \textit{brushless}}
-Los motores \textit{brushless}, o motores sin escobillas de corriente continua (BLDC), son un tipo de motor trifásico síncrono que utilizan imanes permanentes en el rotor y bobinas en el estátor, el cual está formado por laminas de hierro con ranuras para alojar las bobinas. A diferencia de los motores de corriente continua con escobillas, los BLDC no emplean elementos mecánicos para conmutar la corriente en las bobinas. En su lugar, esta conmutación se realiza mediante un controlador electrónico \cite{frick2018bldc}, eliminando el rozamiento y el desgaste asociados a las escobillas, lo que mejora la eficiencia del sistema.
+Los motores \textit{brushless}, o motores sin escobillas de corriente continua (BLDC), son un tipo de motor trifásico síncrono que utiliza imanes permanentes en el rotor y bobinas en el estátor, el cual está formado por láminas de hierro con ranuras para alojar las bobinas. A diferencia de los motores de corriente continua con escobillas, los BLDC no emplean elementos mecánicos para conmutar la corriente en las bobinas. En su lugar, esta conmutación se realiza mediante un controlador electrónico \cite{frick2018bldc}, eliminando el rozamiento y el desgaste asociados a las escobillas, lo que mejora la eficiencia del sistema.
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.6\textwidth]{imagenes/Motor/OUT_IN_BLDC_SF}
+	\includegraphics[width=0.6\textwidth]{imagenes/Motor/OUT_IN_BLDC_SF.png}
 	\caption{Esquema de motores sin escobillas (\textit{BLDC}).}
 	\label{fig:motor_sin_escobillas}
 \end{figure}
 \FloatBarrier
 
-Similar a los motores trifásicos de corriente alterna, estos pueden tener configuraciones de bobinado en delta o estrella \cite{Millet2022}. Además, como se ejemplifica en la figura \ref{fig:motor_sin_escobillas}, pueden presentar configuraciones \textit{in-runner}, donde los imanes están en el centro del eje con las bobinas en el exterior, o configuraciones \textit{out-runner} , donde los imanes se encuentran por fuera del motor, mientras que las bobinas están en el centro \cite{9774372}. Estos motores, al requerir una sincronización entre el campo magnético del estátor y el campo magnético del rotor, suelen utilizar encoders o sensores de efecto Hall para obtener información sobre la posición del eje, y de este modo, mantener una conmutación adecuada. No obstante, también es posible emplear técnicas \textit{sensorless} (sin sensor) para estimar la posición del rotor sin necesidad de sensores físicos. \cite{Gualtieri2018_STEP}
+Similar a los motores trifásicos de corriente alterna, estos pueden tener configuraciones de bobinado en delta o estrella \cite{Millet2022}. Además, como se ejemplifica en la figura \ref{fig:motor_sin_escobillas}, pueden presentar configuraciones \textit{in-runner}, donde los imanes están en el centro del eje con las bobinas en el exterior, o configuraciones \textit{out-runner} , donde los imanes se encuentran por fuera del motor, mientras que las bobinas están en el centro \cite{9774372}. Estos motores, al requerir una sincronización entre el campo magnético del estátor y el campo magnético del rotor, suelen utilizar encoders o sensores de efecto Hall para obtener información sobre la posición del eje y, de este modo, mantener una conmutación adecuada. No obstante, también es posible emplear técnicas \textit{sensorless} (sin sensor) para estimar la posición del rotor sin necesidad de sensores físicos \cite{Gualtieri2018_STEP}.
 
-Los \textit{BLDC} se destacan por ofrecer una mayor densidad de potencia, mayor torque, mejor eficiencias y pueden llegar a velocidades mas altas. Sin embargo, al requerir de un controlador electrónico que se encargue de la conmutación para generar el movimiento del rotor, la complejidad y los costos asociados a su implementación son mayores. \cite{AN885}
+Los \textit{BLDC} se destacan por ofrecer una mayor densidad de potencia, mayor torque, mejores eficiencias y pueden alcanzar velocidades más altas. Sin embargo, al requerir de un controlador electrónico que se encargue de la conmutación para generar el movimiento del rotor, la complejidad y los costos asociados a su implementación son mayores \cite{AN885}.
 
 \newpage
 \subsection{Control Orientado de Campo (FOC)}
-El control orientado de campo se basa en desacoplar el flujo electromagnético del par motor, permitiendo el control independiente de cada uno, aunque en este caso se realiza de forma indirecta, trabajando con las corrientes del estátor en ves de las variables reales de flujo y par. Este desacoplamiento se logra mediante la transformación de las variables trifásicas del motor, que están en un marco de referencia estacionario \(ABC\), hacia un marco de referencia rotatorio \(dq\) que gira en sincronía con el rotor del motor. \cite{power_conv_14}
+El control orientado de campo se basa en desacoplar el flujo electromagnético del par motor, permitiendo el control independiente de cada uno, aunque en este caso se realiza de forma indirecta, trabajando con las corrientes del estátor en vez de las variables reales de flujo y par. Este desacoplamiento se logra mediante la transformación de las variables trifásicas del motor, que están en un marco de referencia estacionario \(ABC\), hacia un marco de referencia rotatorio \(dq\) que gira en sincronía con el rotor del motor \cite{power_conv_14}.
 
 \begin{figure}[ht]
 	\centering
@@ -155,11 +155,11 @@ El control orientado de campo se basa en desacoplar el flujo electromagnético d
 \end{figure}
 \FloatBarrier
 
-La figura \ref{fig:foc_transform}, presenta el diagrama de flujo base de un controlar FOC, con sus elementos esenciales, donde podemos apreciar la separación por hardware, controladores de corriente, ademas de los controladores de velocidad y posición. La transformación entre los marcos de referencia se realiza aplicando la transformada de Clarke y la transformada de Park. De esta forma, las mediciones de corriente que presentan un comportamiento oscilatorio en el tiempo se convierten en variables de corriente continua, lo que virtualmente emula, el funcionamiento de un motor con escobillas a nivel de los controladores\cite{power_conv_14}, posteriormente se aplican los controladores de corriente y velocidad para obtener las señales de control necesarias para el inversor trifásico. 
+La figura \ref{fig:foc_transform} presenta el diagrama de flujo base de un controlador FOC, con sus elementos esenciales, donde podemos apreciar la separación por hardware, controladores de corriente, además de los controladores de velocidad y posición. La transformación entre los marcos de referencia se realiza aplicando la transformada de Clarke y la transformada de Park. De esta forma, las mediciones de corriente que presentan un comportamiento oscilatorio en el tiempo se convierten en variables de corriente continua, lo que virtualmente emula el funcionamiento de un motor con escobillas a nivel de los controladores\cite{power_conv_14}. Posteriormente, se aplican los controladores de corriente y velocidad para obtener las señales de control necesarias para el inversor trifásico.
 
 \newpage
 \subsection{Transformada de Clarke}
-La transformada de Clarke convierte un sistema trifásico de corrientes \(ABC\) en un sistema bifásico \(\alpha\beta\), proyectando las corrientes en un sistema de coordenadas bidimensional estacionario. Esta transformación simplifica el análisis al reducir las tres corrientes de fase a dos componentes ortogonales, manteniendo la información esencial del sistema original. \cite{AN1078}
+La transformada de Clarke convierte un sistema trifásico de corrientes \(ABC\) en un sistema bifásico \(\alpha\beta\), proyectando las corrientes en un sistema de coordenadas bidimensional estacionario. Esta transformación simplifica el análisis al reducir las tres corrientes de fase a dos componentes ortogonales, manteniendo la información esencial del sistema original \cite{AN1078}.
 
 \begin{figure}[ht]
 	\centering
@@ -172,7 +172,7 @@ La transformada de Clarke convierte un sistema trifásico de corrientes \(ABC\) 
 En la figura \ref{fig:clarke_transform} se ilustra la representación gráfica de las corrientes de entrada \(i_a, i_b, i_c\) y las corrientes de salida \(i_\alpha, i_\beta\). Además, se incluyen las ecuaciones necesarias para llevar a cabo la transformación.
 
 \subsection{Transformada de Park}
-La transformada de Park convierte el sistema en el marco de referencia estacionario \(\alpha\beta\) en el sistema en el marco de referencia rotatorio \(dq\) sincronizado con ángulo del rotor\cite{AN1078}.
+La transformada de Park convierte el sistema en el marco de referencia estacionario \(\alpha\beta\) en el sistema en el marco de referencia rotatorio \(dq\) sincronizado con el ángulo del rotor\cite{AN1078}.
 
 \begin{figure}[ht]
 	\centering
@@ -185,7 +185,7 @@ La transformada de Park convierte el sistema en el marco de referencia estaciona
 En la figura \ref{fig:park_transform} se muestra gráficamente cómo las variables \(\alpha, \beta\) se transforman a \(d, q\), junto con las ecuaciones empleadas para llevar a cabo esta transformación.
 
 \subsection{Transformada inversa de Park}
-La transformada inversa de Park convierte el sistema en el marco de referencia rotatorio \(dq\) de vuelta al marco de referencia estacionario \(\alpha\beta\). \cite{AN1078}.
+La transformada inversa de Park convierte el sistema en el marco de referencia rotatorio \(dq\) de vuelta al marco de referencia estacionario \(\alpha\beta\) \cite{AN1078}.
 
 \begin{figure}[ht]
 	\centering
@@ -198,7 +198,7 @@ La transformada inversa de Park convierte el sistema en el marco de referencia r
 En la figura \ref{fig:park_inv_transform} se ilustra cómo las variables \(d, q\) se transforman nuevamente a \(\alpha, \beta\), con las ecuaciones correspondientes a este proceso inverso.
 
 \subsection{Modulación de Espacio Vectorial (SVM)}
-La Modulación por Vector Espacial (SVM) es una técnica utilizada para el control digital de inversores de voltaje. Representa todos los estados de conmutación del inversor como vectores de voltaje en el plano $\alpha$-$\beta$, formando un hexágono regular dividido en seis sectores o sextantes como se pueden ver el la figura \ref{fig:sectantes}. Estos son utilizados para sintetizar el vector de referencia $\mathbf{V}_{\text{ref}}=(V_{\alpha},V_{\beta})$ mediante una suma ponderada de los vectores de voltaje adyacentes en el sextante donde se encuentre, para finalmente calcular los tiempos de activación necesarios en cada face el inversor, logrando una aproximación más \href{https://www.youtube.com/watch?v=NY0ffyEu6uo}{precisa} de la señal deseada.
+La Modulación por Vector Espacial (SVM) es una técnica utilizada para el control digital de inversores de voltaje. Representa todos los estados de conmutación del inversor como vectores de voltaje en el plano $\alpha$-$\beta$, formando un hexágono regular dividido en seis sectores o sextantes, como se puede ver en la figura \ref{fig:sectantes}. Estos se utilizan para sintetizar el vector de referencia $\mathbf{V}_{\text{ref}}=(V_{\alpha},V_{\beta})$ mediante una suma ponderada de los vectores de voltaje adyacentes en el sextante donde se encuentre, para finalmente calcular los tiempos de activación necesarios en cada fase del inversor, logrando una aproximación más \href{https://www.youtube.com/watch?v=NY0ffyEu6uo}{precisa} de la señal deseada.
 
 %\begin{figure}[ht]
 %	\centering
@@ -217,7 +217,7 @@ La Modulación por Vector Espacial (SVM) es una técnica utilizada para el contr
 \end{figure}
 \FloatBarrier
 
-%Se utiliza un patrón de activación específico que permite minimizar la frecuencia de conmutación de los transistores, aprovechando estados redundantes para reducir las pérdidas asociadas a la conmutación y mejorar la eficiencia del sistema\cite{power_conv_06}, como se muestra en la tabla \ref{tabla_svm}, la secuencia de activación es especifica para cada sextante. 
+%Se utiliza un patrón de activación específico que permite minimizar la frecuencia de conmutación de los transistores, aprovechando estados redundantes para reducir las pérdidas asociadas a la conmutación y mejorar la eficiencia del sistema\cite{power_conv_06}, como se muestra en la tabla \ref{tabla_svm}, la secuencia de activación es especifica para cada sextante.
 
 %\begin{table}[htbp]
 %	\centering
@@ -248,9 +248,9 @@ Implementar un controlador de tipo FOC (Control de Campo Orientado) para motores
 
 \subsection{Objetivos Específicos}
 \begin{itemize}
-	\item Estudiar los principios del Control de Campo Orientado (FOC) y la modulación de espacio vectorial (SVM) para aplicarlos en el diseñó del controlador.
+	\item Estudiar los principios del Control de Campo Orientado (FOC) y la modulación de espacio vectorial (SVM) para aplicarlos en el diseño del controlador.
 	\item Diseñar el hardware para el controlador FOC, con los componentes mínimos necesarios para validar el funcionamiento.
-	\item Configurar y programar el microcontrolador para el algoritmo FOC, utilizando las librerías HAL de STM32
+	\item Configurar y programar el microcontrolador para el algoritmo FOC, utilizando las librerías HAL de STM32.
 	\item Validar el funcionamiento del controlador y proponer posibles mejoras para su aplicación en robótica competitiva.
 \end{itemize}
 
@@ -264,7 +264,7 @@ Implementar un controlador de tipo FOC (Control de Campo Orientado) para motores
 	\item El firmware se compilará utilizando un makefile y GCC, junto con la extensión STM32 for VScode.
 	\item Se cargará el firmware utilizando STM32CubeProgrammer y ST-link.
 	\item Se diseñará la PCB en Eagle.
-	\item Se diseñarán las piezas adicionales en Autodesk Inventor, para su posterior fabricación mediante impresión 3D.
+	\item Se diseñarán las piezas adicionales en Autodesk Inventor para su posterior fabricación mediante impresión 3D.
 	\item La PCB se fabricará y semi ensamblará utilizando \href{https://www.youtube.com/watch?v=riT4nl0T8_M}{JLCPCB}.
 	\item Se obtendrán datos detallados durante el tiempo de ejecución.
 	\item Los datos se graficarán utilizando Plotly en Python.
@@ -273,7 +273,7 @@ Implementar un controlador de tipo FOC (Control de Campo Orientado) para motores
 
 \chapter{Hardware}
 \section{Introducción}
-Este capítulo busca documentar el desarrollo e implementación de todo el hardware y electrónica necesaria para el controlador FOC, partiendo por la revisión los parámetros principales y componentes utilizados para finalmente revisar a grandes rasgos el diseñó de la placa controladora.
+Este capítulo busca documentar el desarrollo e implementación de todo el hardware y electrónica necesaria para el controlador FOC, partiendo de la revisión de los parámetros principales y componentes utilizados, para finalmente revisar a grandes rasgos el diseño de la placa controladora.
 
 
 \begin{figure}[ht]
@@ -284,20 +284,34 @@ Este capítulo busca documentar el desarrollo e implementación de todo el hardw
 \end{figure}
 \FloatBarrier
 
-En la Figura \ref{flujo_resumen} se muestra una vista general de la interacción entre los bloques principales del controlador. El microcontrolador, programado con el firmware que utiliza los periféricos para generar las señales PWM necesarias para conducir el inversor trifásico encargado de suministrar la corriente al motor, adquirir las mediciones de corriente de las fases y la posición del rotor a través del encoder. De esta manera cerrando el lazo de control FOC.
+En la Figura \ref{flujo_resumen} se muestra una vista general de la interacción entre los bloques principales del controlador. El microcontrolador, programado con el firmware que utiliza los periféricos para generar las señales PWM necesarias para conducir el inversor trifásico, se encarga de suministrar la corriente al motor y adquirir las mediciones de corriente de las fases, así como la posición del rotor a través del encoder. De esta manera se cierra el lazo de control FOC.
 
 \newpage
-\section{Desarrollo del hardware}
-En esta sección se busca mostrar, a grandes rasgos, los componentes esenciales utilizados en el controlador, tal como se ilustra en la Figura \ref{flujo_resumen_hardware}. El \emph{hardware} está compuesto por un inversor trifásico con MOSFETs, controladores de puerta (\emph{gate drivers}), resistencias \emph{shunt} para la medición de corriente y un motor \emph{brushless} con \emph{encoder}. El regulador de voltaje a 12 V suministra la alimentación necesaria a los controladores de puerta, mientras que la batería provee la potencia principal para el puente MOSFET.
+\section{Desarrollo del Hardware}
+
+En esta sección se describen de manera resumida los componentes esenciales que integran el controlador, ilustrados en la Figura \ref{flujo_resumen_hardware}.
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.76\textwidth]{imagenes/Diagramas/Diagramas - resumen hardware.png}
-	\caption{Diagrama Resumido del hardware.}
+	\caption{Diagrama resumido del hardware.}
 	\label{flujo_resumen_hardware}
 \end{figure}
-\FloatBarrier
 
+A continuación se presenta un listado con los principales componentes:
+
+\begin{itemize}
+    \item \textbf{Inversor Trifásico (Puente MOSFET):} Conmuta la tensión de la batería para generar señales trifásicas y controlar velocidad y par del motor.
+    \item \textbf{Controladores de Puerta (\emph{Gate Drivers}):} Amplifican las señales PWM del microcontrolador para activar y desactivar los MOSFETs de forma eficiente.
+    \item \textbf{Resistencias \emph{Shunt}:} Miden la caída de tensión en cada fase para obtener la corriente, esencial para el control FOC.
+    \item \textbf{Motor Brushless (BLDC):} Motor síncrono trifásico sin escobillas que proporciona alta eficiencia y controlabilidad.
+    \item \textbf{\emph{Encoder}:} Sensor de posición angular que informa de la posición y velocidad del rotor para una conmutación sincronizada.
+    \item \textbf{Regulador de Voltaje 12V:} Fuente estable de 12V para alimentar correctamente los controladores de puerta.
+    \item \textbf{Batería:} Proporciona la potencia principal al inversor, determinando el rendimiento y la autonomía del sistema.
+\end{itemize}
+
+
+\newpage
 \subsection{Motor}
 
 El punto de partida es la selección del motor, que define parámetros cruciales como corriente máxima, voltaje nominal y la velocidad máxima (\emph{Kv}). Estos influyen directamente en la elección de los MOSFETs y resistencias \emph{shunt} para manejar la corriente requerida.
@@ -309,8 +323,7 @@ El punto de partida es la selección del motor, que define parámetros cruciales
 	\label{X3120}
 \end{figure}
 \FloatBarrier
-\newpage
-Se ha optado por utilizar el motor \textbf{SunnySky X3120 V3} de 585Kv para el diseñó del controlador debido a su disponibilidad inmediata. Este es un motor principalmente orientado al uso en drones de tipo aeroplano, pero su gran potencia y bajo peso lo hace ideal para su uso en robots sumo, como se puede ver en la figura \ref{X3120}, se trata de un motor tipo outrunner, en el cual su eje se extiende y sale por la base del motor.
+Se ha optado por utilizar el motor \textbf{SunnySky X3120 V3} de 585Kv para el diseño del controlador debido a su disponibilidad inmediata. Este es un motor principalmente orientado al uso en drones de tipo aeroplano, pero su gran potencia y bajo peso lo hacen ideal para su uso en robots sumo, como se puede ver en la figura \ref{X3120}. Se trata de un motor tipo outrunner, en el cual su eje se extiende y sale por la base del motor.
 
 \begin{table}[h!]
 	\centering
@@ -332,12 +345,43 @@ Se ha optado por utilizar el motor \textbf{SunnySky X3120 V3} de 585Kv para el d
 \end{table}
 \FloatBarrier
 
-Algunos de los parámetros mas relevantes para el diseñó del hardware son el voltaje nominal, que esta marcado como 6S (celdas de lipo), las celdas de lipo varían su voltaje en función de su carga, teniendo un voltaje mínimo de 3V, nominal de 3.7V y máximo de 4.2V, por esto, una batería de 6 celdas en serie corresponde a un voltaje mínimo de 18V, nominal de 22.2V y máximo de 25.2V. otro parámetro importante es la corriente continua máxima de 65A.
+Algunos de los parámetros más relevantes para el diseño del hardware son el voltaje nominal, que está marcado como 6S (celdas de lipo). Las celdas de lipo varían su voltaje en función de su carga, teniendo un voltaje mínimo de 3V, nominal de 3.7V y máximo de 4.2V. Por esto, una batería de 6 celdas en serie corresponde a un voltaje mínimo de 18V, nominal de 22.2V y máximo de 25.2V. Otro parámetro importante es la corriente continua máxima de 65A.
+
+\newpage
+\subsection{Consideraciones para el Controlador Basadas en el Motor}
+
+Tras la selección del motor SunnySky X3120 V3, es crucial revisar los parámetros clave que este impone al diseño del controlador, asegurando que los componentes seleccionados sean adecuados para las exigencias del motor.
+
+El \textbf{voltaje máximo del motor} es de 25.2V, correspondiente a una batería LiPo 6S completamente cargada. Para los MOSFETs del inversor, es recomendable seleccionar dispositivos con un voltaje nominal superior al máximo esperado para proporcionar un margen de seguridad. En la práctica, el valor nominal más cercano y comúnmente utilizado es de \textbf{30V} para MOSFETs. De manera similar, los condensadores en el bus de voltaje deben soportar este voltaje máximo. Siguiendo las tablas de valores nominales estándar para capacitores, se deben utilizar condensadores con un voltaje nominal de al menos \textbf{35V}.
+
+La \textbf{corriente continua máxima} del motor es de 65A. Para el diseño del puente MOSFET, es esencial considerar un margen de seguridad para evitar el sobrecalentamiento y asegurar la fiabilidad del sistema.  Un factor de seguridad común es multiplicar la corriente continua máxima del motor por un factor de al menos tres. Por lo tanto, el puente MOSFET debería ser capaz de soportar al menos \textbf{195A}. Este margen de seguridad garantiza que el controlador pueda manejar picos de corriente y operaciones continuas exigentes sin comprometer los componentes.
+
+Finalmente, la \textbf{velocidad máxima teórica} del motor se puede estimar utilizando su constante \emph{Kv} (585 RPM/V) y el voltaje máximo de operación (25.2V).  Esto resulta en una velocidad teórica máxima de aproximadamente \textbf{14.742 RPM} (\(585 \frac{\text{RPM}}{V} \times 25.2 \text{V} \approx 14742 \text{RPM}\)). Esta velocidad máxima es importante para la selección del encoder, asegurando que pueda operar correctamente dentro de este rango de velocidades sin perder precisión o funcionalidad.
+
+En la siguiente tabla se resumen estos parámetros y las consideraciones para la selección de componentes del controlador:
+
+\begin{table}[h!]
+	\centering
+	\caption{Parámetros Requeridos para el Controlador Basados en el Motor SunnySky X3120 V3}
+	\begin{tabular}{l l}
+		\hline
+		\textbf{Parámetro del Controlador}         & \textbf{Valor Mínimo Requerido}           \\
+		\hline
+		Voltaje Nominal de Operación         & 22.2V                 \\
+		Voltaje Drain-Source MOSFET (\(V_{DS}\)) & $\geq$ 30V                   \\
+		Corriente Drain-Source MOSFET (\(I_D\))          & $\geq$ 195A             \\
+		Voltaje de los Capacitores          & $\geq$ 35V             \\
+		Velocidad Máxima del Encoder          & $\geq$ 15,000 RPM             \\
+		\hline
+	\end{tabular}
+	\label{tabla_parametros_controlador}
+\end{table}
+\FloatBarrier
 
 \newpage
 \subsection{Encoder}
 
-El encoder es el encargado de proveer la información sobre la posición angular del rotor en el motor, se utilizó el encoder magnético AS5047P (figura \ref{AS5047P}), el cual utiliza un imán especial con una polarización diametral en el eje del motor y un arreglo de sensores HAL internos, para poder medir e interpretar la posición angular del imán.
+El encoder es el encargado de proveer la información sobre la posición angular del rotor en el motor. Se utilizó el encoder magnético AS5047P (figura \ref{AS5047P}), el cual utiliza un imán especial con una polarización diametral en el eje del motor y un arreglo de sensores HAL internos, para poder medir e interpretar la posición angular del imán.
 
 \begin{figure}[ht]
 	\centering
@@ -347,7 +391,7 @@ El encoder es el encargado de proveer la información sobre la posición angular
 \end{figure}
 \FloatBarrier
 
-En esencia este es un encoder absoluto que funciona principalmente a traves de una comunicación SPI, pero opcionalmente incorpora una salida que imita el comportamiento de un encoder incremental con señal index también conocidos como ABI o ABZ por sus señales, los microcontroladores STM32 incorporan periféricos que pueden trabajar de forma nativa con estas señales sin mayor intervención del procesador, lo que simplifica en gran medida su implementación en comparación con el uso de SPI, aun que en consecuencia se pierden las capacidades de encoder absoluto.
+En esencia, este es un encoder absoluto que funciona principalmente a través de una comunicación SPI, pero opcionalmente incorpora una salida que imita el comportamiento de un encoder incremental con señal index, también conocidos como ABI o ABZ por sus señales. Los microcontroladores STM32 incorporan periféricos que pueden trabajar de forma nativa con estas señales sin mayor intervención del procesador, lo que simplifica en gran medida su implementación en comparación con el uso de SPI, aunque, en consecuencia, se pierden las capacidades de encoder absoluto.
 
 \begin{table}[h!]
 	\centering
@@ -405,7 +449,7 @@ Asimismo, se diseñó un \textbf{socket para el imán} (figura \ref{fig:iman}) c
 \newpage
 \subsection{Puente Mosfet}
 
-El puente mosfet es una de las partes del hardware mas critica, este se encarga de realizar las conmutaciones en las fases del motor, como se puede ver el la figura \ref{puente_MOSFET}, se divide en 3 piernas (o fases) iguales, donde cada pierna está conformada por 2 mosfets de tipo N en configuración push-pull, es decir, se tiene un mosfet alto conectado a $V+$ y un mosfet bajo conectado a $V-$. cada mosfet tiene su propia señal de gate las cuales se deben controlar de forma adecuada para evitar cortocircuitos. es importante considerar que cada pierna del puente debe soportar por lo menos la corriente máxima del motor, aun que idealmente se deja un margen de seguridad de 2 a 3 veces la corriente máxima, considerando la corriente de 65A del sunnysky X3120, los mosfets deberán de soporta al menos 195A continuos y un voltaje Drain-source sobre los 25.2V para poder trabajar con la batería 6S.
+El puente mosfet es una de las partes del hardware más crítica. Este se encarga de realizar las conmutaciones en las fases del motor. Como se puede ver en la figura \ref{puente_MOSFET}, se divide en 3 piernas (o fases) iguales, donde cada pierna está conformada por 2 mosfets de tipo N en configuración push-pull, es decir, se tiene un mosfet alto conectado a $V+$ y un mosfet bajo conectado a $V-$. Cada mosfet tiene su propia señal de gate, las cuales se deben controlar de forma adecuada para evitar cortocircuitos. Es importante considerar que cada pierna del puente debe soportar por lo menos la corriente máxima del motor, aunque idealmente se deja un margen de seguridad de 2 a 3 veces la corriente máxima. Considerando la corriente de 65A del sunnysky X3120, los mosfets deberán soportar al menos 195A continuos y un voltaje Drain-source superior a los 25.2V para poder trabajar con la batería 6S.
 
 \begin{figure}[ht]
 	\centering
@@ -415,7 +459,7 @@ El puente mosfet es una de las partes del hardware mas critica, este se encarga 
 \end{figure}
 \FloatBarrier
 
-Se utilizó el mosfet \textbf{BSC011N03LSI} de la marca Infineon, es un Mosfet de tipo N con un voltaje Drain-source de 30V, estos mosfets soportan una corriente continua de 100A.
+Se utilizó el mosfet \textbf{BSC011N03LSI} de la marca Infineon. Es un Mosfet de tipo N con un voltaje Drain-source de 30V. Estos mosfets soportan una corriente continua de 100A.
 
 \begin{table}[h!]
 	\centering
@@ -439,7 +483,7 @@ Se utilizó el mosfet \textbf{BSC011N03LSI} de la marca Infineon, es un Mosfet d
 \newpage
 \subsection{Controladores de Puerta}
 
-El controlador de puerta (gate driver) se encarga de recibir las señales PWM provenientes del microcontrolador ,y en consecuencia, activar o desactivar los MOSFETs en cada pierna del puente. Su función principal es proporcionar la corriente y el voltaje adecuados para encender y apagar rápidamente los MOSFETs, garantizando una conmutación eficiente y minimizando las pérdidas de energía.
+El controlador de puerta (\textit{gate driver}) se encarga de recibir las señales PWM provenientes del microcontrolador y, en consecuencia, activar o desactivar los MOSFETs en cada pierna del puente. Su función principal es proporcionar la corriente y el voltaje adecuados para encender y apagar rápidamente los MOSFETs, garantizando una conmutación eficiente y minimizando las pérdidas de energía.
 
 \begin{figure}[ht]
 	\centering
@@ -449,7 +493,7 @@ El controlador de puerta (gate driver) se encarga de recibir las señales PWM pr
 \end{figure}
 \FloatBarrier
 
-Se utilizó el controlador de puerta \textbf{UCC27211} de Texas Instruments, el cual es un driver de doble canal diseñado específicamente para controlar pares de MOSFETs y como se puede ver en la figura \ref{UCC27211}, este tiene un esquema de conexiones bastante simple. Este dispositivo ofrece entradas de control independientes para los MOSFETs de alta (\texttt{H In}) y baja (\texttt{L In}), lo que permite un control preciso y flexible de cada transistor de potencia.
+Se utilizó el controlador de puerta \textbf{UCC27211} de Texas Instruments, el cual es un driver de doble canal diseñado específicamente para controlar pares de MOSFETs y, como se puede ver en la figura \ref{UCC27211}, este tiene un esquema de conexiones bastante simple. Este dispositivo ofrece entradas de control independientes para los MOSFETs de alta (\texttt{H In}) y baja (\texttt{L In}), lo que permite un control preciso y flexible de cada transistor de potencia.
 
 \begin{table}[ht]
 	\centering
@@ -467,7 +511,7 @@ Se utilizó el controlador de puerta \textbf{UCC27211} de Texas Instruments, el 
 \FloatBarrier
 
 \newpage
-Como se puede apreciar en la tabla \ref{tab:device_logic}, el UCC2711 no incorpora protección interna contra la conducción simultánea de ambos MOSFETs conocido como \textbf{shoot-through}. Este fenómeno ocurre cuando ambos MOSFETs de una pierna se activan y conducen al mismo tiempo, generando un cortocircuito entre el suministro de voltaje y tierra. Para evitar esta situación es importante agregar un tiempo entre la conmutación de las señales de entrada conocido como \textbf{Dead-Time}, el cual se estima considerando los tiempos de conmutación del controlador de puerta junto al tiempo de conmutación del mosfet
+Como se puede apreciar en la tabla \ref{tab:device_logic}, el UCC2711 no incorpora protección interna contra la conducción simultánea de ambos MOSFETs, conocido como \textbf{shoot-through}. Este fenómeno ocurre cuando ambos MOSFETs de una pierna se activan y conducen al mismo tiempo, generando un cortocircuito entre el suministro de voltaje y tierra. Para evitar esta situación, es importante agregar un tiempo entre la conmutación de las señales de entrada, conocido como \textbf{Dead-Time}, el cual se estima considerando los tiempos de conmutación del controlador de puerta junto con el tiempo de conmutación del mosfet.
 
 \begin{figure}[ht]
 	\centering
@@ -477,7 +521,7 @@ Como se puede apreciar en la tabla \ref{tab:device_logic}, el UCC2711 no incorpo
 \end{figure}
 \FloatBarrier
 
-El UCC27211 no dispone de un pin para activar o desactivar el control de los mosfets, por su parte, la única forma de desactivar el puente mosfet en su totalidad es llevar las señales de entrada alta (H In) y baja (L In) a un estado bajo (L), además el microcontrolador al realizar esta acción puede llegar a perder el control sobre el estado de las señales PWM y asi generar por un breve momento un estado de doble activación de los mosfet. para evitar esto se agregaron externamente dos compuertas AND modelo SN74LVC1G08DBVR en cada señal PWM, como se puede ver en la figura \ref{fig:control-pwm-and}, con el fin de poder cortar las señales desde el microcontrolador de forma segura y asi desactivar el puente mosfet, el comportamiento final con este agregado se puede ver en la tabla \ref{UCC27211_logic}.
+El UCC27211 no dispone de un pin para activar o desactivar el control de los mosfets. Por su parte, la única forma de desactivar el puente mosfet en su totalidad es llevar las señales de entrada alta (H In) y baja (L In) a un estado bajo (L). Además, el microcontrolador, al realizar esta acción, puede llegar a perder el control sobre el estado de las señales PWM y así generar por un breve momento un estado de doble activación de los mosfet. Para evitar esto, se agregaron externamente dos compuertas AND modelo SN74LVC1G08DBVR en cada señal PWM, como se puede ver en la figura \ref{fig:control-pwm-and}, con el fin de poder cortar las señales desde el microcontrolador de forma segura y así desactivar el puente mosfet. El comportamiento final con este agregado se puede ver en la tabla \ref{UCC27211_logic}.
 
 \begin{table}[ht]
 	\centering
@@ -500,7 +544,7 @@ El UCC27211 no dispone de un pin para activar o desactivar el control de los mos
 \newpage
 \subsection{Sensores de Corriente}
 
-Para el sensor de corriente se opto por una configuración de resistencia shunt en la salida del puente mosfet como se puede ver en la figura \ref{INA240}, esta configuración aprovecha la caída de tension provocada por la resistencia de valor conocido para poder calcular la corriente del circuito, se utiliza un amplificador instrumental especializado en esta aplicación, en este caso se utilizó el INA240A1 que tiene una ganancia de 20V/V y se le aplica un offset equivalente a la mitad voltaje de referencia de 3.3V.
+Para el sensor de corriente se optó por una configuración de resistencia shunt en la salida del puente mosfet, como se puede ver en la figura \ref{INA240}. Esta configuración aprovecha la caída de tensión provocada por la resistencia de valor conocido para poder calcular la corriente del circuito. Se utiliza un amplificador instrumental especializado en esta aplicación. En este caso, se utilizó el INA240A1, que tiene una ganancia de 20V/V y se le aplica un offset equivalente a la mitad del voltaje de referencia de 3.3V.
 
 \begin{figure}[ht]
 	\centering
@@ -510,7 +554,7 @@ Para el sensor de corriente se opto por una configuración de resistencia shunt 
 \end{figure}
 \FloatBarrier
 
-Para la resistencia shunt se utilizó una doble resistencia en paralelo como se ve en la figura \ref{PCB_pierna_C}, la resistencia es de 1m$\Omega$ y 5W de disipación lo que da una una resistencia equivalente de 500$\mu\Omega$ y 10W de disipación, para determinar la corriente máxima que puede pasar la resistencia conociendo su valor en ohmios \( R \) y la potencia \( P \) en vatios, se puede calcular utilizando la siguiente fórmula:
+Para la resistencia shunt se utilizó una doble resistencia en paralelo, como se ve en la figura \ref{PCB_pierna_C}. La resistencia es de 1m$\Omega$ y 5W de disipación, lo que da una resistencia equivalente de 500$\mu\Omega$ y 10W de disipación. Para determinar la corriente máxima que puede pasar por la resistencia conociendo su valor en ohmios \( R \) y la potencia \( P \) en vatios, se puede calcular utilizando la siguiente fórmula:
 
 \[
 	I_{\text{max}} = \sqrt{\frac{P}{R}}
@@ -523,11 +567,11 @@ Donde:
 	\item \( R \) es el valor de la resistencia en ohmios ($\Omega$).
 \end{itemize}
 
-De esta forma se determina que el máximo de corriente continua que puede circular por las resistencias es de 141.42A.
+De esta forma, se determina que el máximo de corriente continua que puede circular por las resistencias es de 141.42A.
 
 \newpage
 \section{Implementación del puente MOSFET}
-El diseñó de la PCB esta realizado en el software de Eagle, ya que este software de diseñó contiene un entorno amigable para el diseñó de  PCBs, además de tener una gran adaptabilidad según el tipo de proyecto a realizar.
+El diseño de la PCB está realizado en el software Eagle, ya que este entorno de diseño ofrece una interfaz amigable para el diseño de PCBs, además de una gran adaptabilidad según las necesidades del proyecto.
 
 \begin{figure}[ht]
 	\centering
@@ -537,7 +581,7 @@ El diseñó de la PCB esta realizado en el software de Eagle, ya que este softwa
 \end{figure}
 \FloatBarrier
 
-Se conectaron condensadores de desacoplo de 100$\text{nF}$ en las entradas de alimentación de los diferentes componentes para eliminar ruido provenientes de los reguladores de voltaje. además se agrego un regulador de voltaje de referencia de 3.3V el cual sirve de referencia para los ADC y además se utiliza para el ajuste del offset en los amplificadores INA240.
+En la Figura \ref{esquema_pierna_C} se presenta el esquemático de una de las piernas del inversor, específicamente la pierna C.  Como se puede apreciar, se conectaron condensadores de desacoplo de 100$\text{nF}$ en las entradas de alimentación de los diferentes componentes para mitigar el ruido proveniente de los reguladores de voltaje. Adicionalmente, se incorporó un regulador de voltaje de referencia de 3.3V, el cual no solo sirve como referencia para los ADC, sino que también se utiliza para el ajuste del offset en los amplificadores INA240.
 
 \begin{figure}[ht]
 	\centering
@@ -547,19 +591,20 @@ Se conectaron condensadores de desacoplo de 100$\text{nF}$ en las entradas de al
 \end{figure}
 \FloatBarrier
 
-Basado en las características del mosfet el cual soporta una corriente continua de 100 A, utilizar 2 mosfet por pierna seria insuficiente, por lo que se opto por utilizar configuración de 4 mosfets con doble mosfet en paralelo, de esta forma se puede considerar una capacidad total de 200A continuos, despreciando las leves diferencias entre los mosfets del mismo modelo.
+La implementación física de la pierna C del inversor se muestra en la Figura \ref{PCB_pierna_C}.  Basado en las características del MOSFET, que soporta una corriente continua de 100 A, se determinó que utilizar solo dos MOSFETs por pierna sería insuficiente. Por lo tanto, se optó por una configuración de cuatro MOSFETs, con doble MOSFET en paralelo. De esta manera, como se observa en la figura,  se puede considerar una capacidad total de 200A continuos, despreciando las leves diferencias entre los MOSFETs del mismo modelo.
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.8\textwidth]{imagenes/PCB/alimentacion mosfet.jpg}
-	\caption{alimentación del Puente MOSFET.}
+	\caption{Alimentación del Puente MOSFET.}
 	\label{alimentacion}
 \end{figure}
 \FloatBarrier
 
-En el reverso de la \href{https://www.youtube.com/watch?v=J---aiyznGQ}{PCB} se realizó un estañado de las pistas de alimentación de alta corriente correspondientes al puente mosfet, en respuesta a las altas exigencias demandadas por el motor. A la vez que se dispusieron varios capacitores electrolíticos de 470$\mu\text{F}$ y capacitores cerámicos de 22$\mu\text{F}$ estratégicamente posicionados para mitigar los picos de corriente y garantizar la estabilidad del sistema.
+En la Figura \ref{alimentacion}, que muestra la alimentación del puente MOSFET en el reverso de la PCB, se puede apreciar el estañado realizado en las pistas de alimentación de alta corriente correspondientes al puente MOSFET. Esta medida se implementó en respuesta a las altas exigencias de corriente demandadas por el motor.  Conjuntamente, se dispusieron varios capacitores electrolíticos de 470$\mu\text{F}$ y capacitores cerámicos de 22$\mu\text{F}$ estratégicamente posicionados para mitigar los picos de corriente y garantizar la estabilidad del sistema.
 
-La PCB fue fabricada a pedido por JLCPCB debido a su plataforma intuitiva, lo cual simplifica significativamente el proceso de producción. Además, el diseñó de la PCB consta de 6 capas, y JLCPCB ofrece costos más competitivos para este tipo de configuraciones multicapa, lo que lo convierte en una opción económica y eficiente.
+%Finalmente, la PCB fue fabricada a pedido por JLCPCB, eligiendo este proveedor por su plataforma intuitiva, que simplifica significativamente el proceso de producción.  Además, el diseño de la PCB consta de 6 capas, y JLCPCB ofrece costos competitivos para este tipo de configuraciones multicapa, convirtiéndolo en una opción económica y eficiente.
+
 
 \newpage
 \section{Observaciones y posibles mejoras}
@@ -573,10 +618,10 @@ Por último, se detectó que, en condiciones de carga extrema, las caídas de te
 \newpage
 \chapter{Firmware}
 \section{Introducción}
-Este capítulo busca documentar el desarrollo e implementación del firmware, partiendo por la revisión de los periféricos utilizados y la configuración de estos, finalmente se revisar a grandes rasgos el diseñó e implementación del algoritmo para el control FOC.
+Este capítulo busca documentar el desarrollo e implementación del firmware, partiendo de la revisión de los periféricos utilizados y la configuración de estos. Finalmente, se revisará a grandes rasgos el diseño e implementación del algoritmo para el control FOC.
 
 \section{Microcontrolador y periféricos}
-Se utilizó un microcontrolador de la serie H7 de STM32, esta es la serie de alto performance de STM32 que incorpora un núcleo ARM Cortex M7 con unidad de calculo para punto flotante de doble precision (FPU). el modelo especifico es STM32H743VIT6, su núcleo trabaja a 480MHz, tiene de 1MB de memoria RAM y 2MB de memoria flash, donde asi una potencia de computo y capacidad bastante elevada para un microcontrolador.
+Se utilizó un microcontrolador de la serie H7 de STM32. Esta es la serie de alto rendimiento de STM32 que incorpora un núcleo ARM Cortex M7 con unidad de cálculo para punto flotante de doble precisión (FPU). El modelo específico es STM32H743VIT6. Su núcleo trabaja a 480MHz, tiene 1MB de memoria RAM y 2MB de memoria flash, ofreciendo así una potencia de cómputo y capacidad bastante elevada para un microcontrolador.
 
 \begin{itemize}
 	\item \textbf{Core}: Arm Cortex-M7 de 32bits a 480 MHz, FPU de doble precisión.
@@ -591,13 +636,13 @@ Se utilizó un microcontrolador de la serie H7 de STM32, esta es la serie de alt
 	\item \textbf{Programación y Depuración}: Interfaz SWD y JTAG.
 \end{itemize}
 
-Los periféricos en un microcontrolador son piezas de hardware especializados en una función que van integrados en el microcontrolador y permiten interactuar con el mundo exterior a traves de sus señales eléctricas, ya sean entradas o salidas, digitales o análogas. en el ecosistema de STM32 existe la herramienta \textbf{STM32CubeMX} que permite configurar todos los periféricos del microcontrolador desde una interfaz gráficas fácil de entender para posteriormente poder generar un código C que implemente todas las configuraciones en el microcontrolador utilizando las librerías HAL de STM32, de esta forma \textbf{STM32CubeMX} genera un código base desde el que empezar a programar el firmware con todos los periféricos ya configurados.
+Los periféricos en un microcontrolador son piezas de hardware especializados en una función que van integrados en el microcontrolador y permiten interactuar con el mundo exterior a través de sus señales eléctricas, ya sean entradas o salidas, digitales o análogas. En el ecosistema de STM32 existe la herramienta \textbf{STM32CubeMX}, que permite configurar todos los periféricos del microcontrolador desde una interfaz gráfica fácil de entender para posteriormente poder generar un código C que implemente todas las configuraciones en el microcontrolador utilizando las librerías HAL de STM32. De esta forma, \textbf{STM32CubeMX} genera un código base desde el que empezar a programar el firmware con todos los periféricos ya configurados.
 
 \subsection{Configuración de Timers}
 Los timers en los microcontroladores STM32 permiten contar eventos y controlar pines de salida según dichos eventos. Estos eventos pueden provenir del reloj interno o de señales externas. La familia STM32 ofrece gran flexibilidad para configurar modos de conteo, fuentes de reloj y funcionalidades específicas, como la generación de PWM o la captura de entrada.
 
 \subsubsection{Timer 1}
-El Timer 1, al ser de tipo \textbf{Advanced-control} de hasta 16 bits, está especialmente diseñado para la generación de señales PWM con complementarias con inserción de \emph{dead time}, lo que facilita el control de puentes MOSFET. Se configura en modo \emph{center-aligned} (cuenta ascendente y descendente), permitiendo tener salidas PWM adecuadas para su uso con el SVM.
+El Timer 1, al ser de tipo \textbf{Advanced-control} de hasta 16 bits, está especialmente diseñado para la generación de señales PWM complementarias con inserción de \emph{dead time}, lo que facilita el control de puentes MOSFET. Se configura en modo \emph{center-aligned} (cuenta ascendente y descendente), permitiendo tener salidas PWM adecuadas para su uso con el SVM.
 
 \begin{table}[h!]
 	\centering
@@ -626,10 +671,10 @@ El Timer 1, al ser de tipo \textbf{Advanced-control} de hasta 16 bits, está esp
 \end{table}
 \FloatBarrier
 
-Dado que el reloj base es de 240 MHz y el \texttt{Counter Period} se establece en 5000, se obtiene un evento de desborde a 48 kHz (\(\frac{240\text{ MHz}}{5000} = 48\text{ kHz}\)) (El desborde es cuando el contador llega a su valor mínimo o máximo). En modo \emph{center-aligned}, cada ciclo completo de PWM comprende una fase ascendente y otra descendente, por lo que el PWM resultante es de 24 kHz. Además, las interrupciones del Timer 1 se generan en cada suceso de desborde , por lo que se dispone de una rutina de interrupción a 48 kHz para efectuar los cálculos y actualizaciones del lazo de control.
+Dado que el reloj base es de 240 MHz y el \texttt{Counter Period} se establece en 5000, se obtiene un evento de desborde a 48 kHz (\(\frac{240\text{ MHz}}{5000} = 48\text{ kHz}\)) (El desborde es cuando el contador llega a su valor mínimo o máximo). En modo \emph{center-aligned}, cada ciclo completo de PWM comprende una fase ascendente y otra descendente, por lo que el PWM resultante es de 24 kHz. Además, las interrupciones del Timer 1 se generan en cada suceso de desborde, por lo que se dispone de una rutina de interrupción a 48 kHz para efectuar los cálculos y actualizaciones del lazo de control.
 
 \subsubsection{Timer 3}
-El Timer 3 es un timer de uso general de 16 bits, esta configurado en \textbf{modo encoder}, que permite contar los pulsos de un \emph{encoder} incremental sin intervención directa del firmware. De este modo, el microcontrolador registra por hardware los cambios de las fases A y B, en modo de conteo por 4 (X4). Se configura un \emph{input filter} para evitar pulsos espurios debidos al ruido, y se asigna un \texttt{Counter Period} de 65535 (el máximo para 16 bits), aun que este valor al corresponder solo a unos pocos giros del motor, es necesario implementar una gestión del desborde del timer.
+El Timer 3 es un timer de uso general de 16 bits, está configurado en \textbf{modo encoder}, que permite contar los pulsos de un \emph{encoder} incremental sin intervención directa del firmware. De este modo, el microcontrolador registra por hardware los cambios de las fases A y B, en modo de conteo por 4 (X4). Se configura un \emph{input filter} para evitar pulsos espurios debidos al ruido, y se asigna un \texttt{Counter Period} de 65535 (el máximo para 16 bits), aunque este valor, al corresponder solo a unos pocos giros del motor, hace necesario implementar una gestión del desborde del timer.
 
 \subsubsection{Timer 2}
 El Timer 2 es un timer de uso general de 32 bits, se utiliza para adquirir mediciones precisas de tiempo relacionadas con la operación del encoder y la sincronización global del sistema. En CubeMX, se configura con reloj interno (\emph{Internal Clock} de 240 MHz) y se opera en modo \emph{Up} con un \texttt{Counter Period} de 4294967295 (valor máximo de 32 bits). A continuación, se describen las conexiones de cada canal:
@@ -668,7 +713,7 @@ El Timer 2 es un timer de uso general de 32 bits, se utiliza para adquirir medic
 \end{itemize}
 
 
-\subsection{Configuración de los ADC y su integración con Timers y DMA} En los microcontroladores STM32, los conversores análogo-digital (ADC) se encargan de transformar voltajes analógicos en valores digitales dentro de un rango específico. En la serie H7, cada ADC ofrece una resolución de 16 bits y puede operar en dos modos principales:
+\subsection{Configuración de los ADC y su integración con Timers y DMA} En los microcontroladores STM32, los conversores analógico-digital (ADC) se encargan de transformar voltajes analógicos en valores digitales dentro de un rango específico. En la serie H7, cada ADC ofrece una resolución de 16 bits y puede operar en dos modos principales:
 
 \begin{itemize}
 	\item \textbf{Conversión regular:} Permite leer hasta 16 canales en una secuencia programable. Se puede combinar con el módulo DMA (Acceso Directo a Memoria) para transferir los valores de conversión directamente a la memoria RAM sin necesidad de intervención del procesador, optimizando así el rendimiento.
@@ -677,17 +722,17 @@ El Timer 2 es un timer de uso general de 32 bits, se utiliza para adquirir medic
 
 \textbf{DMA (Acceso Directo a Memoria):} El DMA es un módulo que permite trasladar datos entre periféricos y la memoria sin intervención de la CPU. De esta manera, mientras el ADC realiza sus mediciones, el DMA copia automáticamente los resultados a la RAM, liberando al núcleo del microcontrolador de dichas tareas y mejorando la eficiencia general del sistema.
 
-\textbf{ADC 1:} El ADC 1 se encarga de la medición de las corrientes de fase, provenientes de los amplificadores operacionales que acondicionan las resistencias \emph{shunt}. Para sincronizar estas mediciones con las interrupciones del sistema  para que las lecturas estén disponibles a tiempo, se utiliza el \textbf{modo inyectado} del ADC, asociado a un disparo (\emph{trigger}) generado por el Timer 15.
+\textbf{ADC 1:} El ADC 1 se encarga de la medición de las corrientes de fase, provenientes de los amplificadores operacionales que acondicionan las resistencias \emph{shunt}. Para sincronizar estas mediciones con las interrupciones del sistema y asegurar que las lecturas estén disponibles a tiempo, se utiliza el \textbf{modo inyectado} del ADC, asociado a un disparo (\emph{trigger}) generado por el Timer 15.
 
-\textbf{Timer 15:} El Timer 15 está configurado como esclavo del Timer 1 y emplea su \emph{Channel 1} en modo de comparación, sin generar salida directa pero conectado al (\emph{trigger out}), de esta forma se produce un pulso de sincronización con un pequeño desfase respecto a cuando se ejecute la interrupción del Timer 1. Este pulso activa la lectura inyectada en el ADC 1. De esta forma los resultados de las mediciones están listos en los registros del ADC cuando se ejecuta la rutina de interrupción.
+\textbf{Timer 15:} El Timer 15 está configurado como esclavo del Timer 1 y emplea su \emph{Channel 1} en modo de comparación, sin generar salida directa, pero conectado al (\emph{trigger out}). De esta forma, se produce un pulso de sincronización con un pequeño desfase respecto a cuando se ejecute la interrupción del Timer 1. Este pulso activa la lectura inyectada en el ADC 1. Así, los resultados de las mediciones están listos en los registros del ADC cuando se ejecuta la rutina de interrupción.
 
 \textbf{ADC 3:} El ADC 3 se utiliza para monitorear el voltaje de bus (por ejemplo, el suministro proveniente de la batería o la fuente principal). Dado que esta lectura no requiere una sincronización tan estricta, se configura en \textbf{modo regular}, habilitando conversiones continuas. Adicionalmente, se activa el módulo DMA para transferir los resultados al área de memoria en RAM, evitando sobrecargar la CPU con lecturas repetitivas.
 
-\textbf{ADC 2:} Por último, el ADC 2 está destinado a la lectura de señales análogas utilizadas, en este caso, conectados a potenciómetros utilizados para el control de los setpoints en los controladores. Al igual que en el ADC 3, se configura en \textbf{modo regular} con conversiones continuas, y se emplea el DMA para automatizar la transferencia de los datos a memoria. Con esta configuración, se pueden atender varios canales análogos (por ejemplo, múltiples potenciómetros) sin que el procesador se vea afectado por interrupciones frecuentes.
+\textbf{ADC 2:} Por último, el ADC 2 está destinado a la lectura de señales analógicas utilizadas, en este caso, conectados a potenciómetros utilizados para el control de los setpoints en los controladores. Al igual que en el ADC 3, se configura en \textbf{modo regular} con conversiones continuas, y se emplea el DMA para automatizar la transferencia de los datos a memoria. Con esta configuración, se pueden atender varios canales analógicos (por ejemplo, múltiples potenciómetros) sin que el procesador se vea afectado por interrupciones frecuentes.
 
 \section{Estructura del Firmware}
 
-Al utilizar la \href{https://www.youtube.com/watch?v=poa_QBvtIBA}{interrupción} del \textbf{Timer 1}, se genera un \emph{“doble hilo de ejecución”}: por un lado, la ejecución del programa en la función \texttt{int main()}, y por otro, la ejecución de la rutina de interrupción. Estos dos flujos deben interactuar entre sí sin interferir en el desempeño mutuo, lo cual exige un manejo adecuado de la \emph{sincronización} de las variables compartidas. No obstante, al contar con un único núcleo, esta coordinación puede resolverse con facilidad mediante variables globales, que actúan como intermediarios entre ambas líneas de ejecución.
+Para la gestión del control del motor, el firmware se estructura en torno a dos líneas de ejecución principales que operan de forma pseudo-paralela. Esta arquitectura se basa en la utilización de la \href{https://www.youtube.com/watch?v=poa_QBvtIBA}{interrupción} del Timer 1 para la ejecución de las tareas críticas de control, generando lo que se puede conceptualizar como un \emph{``doble hilo de ejecución''}.  Esta estructura permite mantener una ejecución continua en la función principal (\texttt{main()}) mientras se ejecutan las rutinas de control de motor de alta prioridad en la interrupción.
 
 \begin{figure}[ht]
 	\centering
@@ -697,8 +742,12 @@ Al utilizar la \href{https://www.youtube.com/watch?v=poa_QBvtIBA}{interrupción}
 \end{figure}
 \FloatBarrier
 
+La Figura \ref{firmware_microcontrolador} ilustra esta estructura, mostrando cómo el firmware se compone de estas dos líneas de ejecución que interactúan con los periféricos del microcontrolador para llevar a cabo las funciones de control del motor y la interacción con el sistema.
+
 
 \subsection{Ejecución en Main}
+
+La ejecución en \texttt{main} inicia con una etapa de \textbf{configuración del sistema}, en la cual se inicializan los periféricos (por ejemplo, los \textbf{ADCs} y los \textbf{timers}). Posteriormente, se ejecuta una \textbf{secuencia de arranque del motor}, que incluye la calibración a cero en los sensores de corriente, el proceso de \emph{homing} y el ajuste del \emph{offset} en el encoder.
 
 \begin{figure}[ht]
 	\centering
@@ -708,18 +757,11 @@ Al utilizar la \href{https://www.youtube.com/watch?v=poa_QBvtIBA}{interrupción}
 \end{figure}
 \FloatBarrier
 
-La ejecución en \texttt{main} inicia con una etapa de \textbf{configuración del sistema}, en la cual se inicializan los periféricos (por ejemplo, los \textbf{ADCs} y los \textbf{timers}). Posteriormente, se ejecuta una \textbf{secuencia de arranque del motor}, que incluye la calibración del cero en los sensores de corriente, el proceso de \emph{homing} y el ajuste del \emph{offset} en el motor.
-
-\newpage
-Completada esta configuración inicial, el sistema entra en un \textbf{bucle principal} que permite realizar distintas acciones, entre las cuales se encuentran:
-\begin{itemize}
-	\item Armado y desactivación del motor.
-	\item Recalibration del motor.
-	\item Control de los estados del motor.
-	\item Envió de información por el USB.
-\end{itemize}
+La Figura \ref{fig:linea_ejecucion_main} presenta un diagrama de flujo resumido de las tareas principales que se ejecutan en la función \texttt{main()}. Tras la inicialización, el programa entra en un bucle \texttt{while(true)}, que constituye el \emph{``bucle principal''} del sistema. En este bucle se gestiona la interacción con el usuario a través de pulsadores, se controla el estado del motor y se maneja la comunicación a través del puerto USB para el envío de datos y funcionalidades de depuración.
 
 \subsection{Ejecución en Interrupción}
+
+la figura \ref{fig:linea_ejecucion_interrupcion} muestra a grandes rasgos la \textbf{rutina de interrupción} \href{https://www.youtube.com/watch?v=RJX_jYm8T84}{asociada} al \texttt{Timer 1} maneja lo relacionado al \textbf{lazo de control del motor} mostrado en la figura \ref{fig:foc_transform}. Su funcionamiento comienza con la obtención de datos provenientes los timers para las medisiones de tiempo y posicion, asi como la abstención de los datos medidos por los ADCs que son almacenados en la memoria RAM por el DMA, estos datos son procesados y normalizados para ser aplicados en las \textbf{transformadas de Clarke y Park} y asi obtener las variables de estado del motor.
 
 \begin{figure}[ht]
 	\centering
@@ -729,15 +771,8 @@ Completada esta configuración inicial, el sistema entra en un \textbf{bucle pri
 \end{figure}
 \FloatBarrier
 
-La \textbf{rutina de interrupción} \href{https://www.youtube.com/watch?v=RJX_jYm8T84}{asociada} al \texttt{Timer 1} maneja el \textbf{lazo de control del motor} y se ejecuta a una frecuencia de 48 kHz. Su funcionamiento comienza con la obtención de datos provenientes de diversos periféricos, tales como:
-\begin{itemize}
-	\item Tiempos medidos por los \textbf{timers}.
-	\item Posición del \textbf{encoder}.
-	\item Lecturas de los \textbf{ADCs}.
-\end{itemize}
-En primer lugar, se \textbf{normalizan} los valores capturados para poder trabajar con estos desde valore reales. A continuación, se aplican las \textbf{transformadas de Clarke y Park} para obtener las variables de estado del motor.
+Se utilizo una \textbf{máquina de estados} para la ejecucion de diferentes tareas, esta es controlada directamente desde la ejecucion main y tiene la capacidad de concadenar varias acciones, de esta forma es capas de realizar las calibraciones del sistema, hacer pruebas con modos alternativos de control o ejecutar el laso de control de velocidad. Finalmente, los valores de salida de se usan para calcular la transformada inversa de Park y consecutivamente el \textbf{SVM} para obtener los valores para los PWM.
 
-Posteriormente, una \textbf{máquina de estado} administra los diferentes modos de operación (por ejemplo, el retorno a \emph{home} o diversas configuraciones del lazo de control). Finalmente, los valores de salida de los \textbf{controladores PI} se transforman de nuevo mediante la inversa de Park y se emplea la \textbf{SVM} para calcular las señales de \emph{PWM} correspondientes..
 
 \newpage
 \section{Observaciones y posibles mejoras}
@@ -765,7 +800,7 @@ Para las validaciones, se realizó una adquisición de datos, donde estos se rec
 \section{Validación de la adquisición y transformación de las mediciones de corriente}
 
 \subsection{Validación de las mediciones de corriente}
-Se validaran las mediciones de corriente adquiridas desde el microcontrolador.
+Se validarán las mediciones de corriente adquiridas desde el microcontrolador.
 
 \begin{figure}[ht]
 	\centering
@@ -785,12 +820,12 @@ En la figura \ref{corrientes_ABC_ideal} se representan las señales ideales de u
 \end{figure}
 \FloatBarrier
 
-En la figura \ref{corrientes_ABC} se pueden apreciar las corrientes de fase, las cuales presentan una cantidad significativa de ruido, aun cuando internamente pasan por un filtro complementario con una frecuencia de corte $f_W=12000Hz$, pero mantienen un comportamiento sinusoidal con el desfase de $120^\circ$ entre señales, como es característico de un sistema trifásico equilibrado. pero la cantidad de ruido podría indicar que seria necesario disminuir la frecuencia de corte en el filtro complementario o agregar un filtro pasivo en el circuito.
+En la figura \ref{corrientes_ABC} se pueden apreciar las corrientes de fase, las cuales presentan una cantidad significativa de ruido, aun cuando internamente pasan por un filtro complementario con una frecuencia de corte $f_W=12000Hz$. No obstante, mantienen un comportamiento sinusoidal con el desfase de $120^\circ$ entre señales, como es característico de un sistema trifásico equilibrado. Sin embargo, la cantidad de ruido podría indicar que sería necesario disminuir la frecuencia de corte en el filtro complementario o agregar un filtro pasivo en el circuito.
 
 \newpage
 \subsection{Validación de la transformada de Clarke}
 
-Se validara los resultado a la salida de la transformada de Clarke en el microcontrolador.
+Se validarán los resultados a la salida de la transformada de Clarke en el microcontrolador.
 
 \begin{figure}[ht]
 	\centering
@@ -810,12 +845,12 @@ En la figura \ref{corrientes_alpha_beta_ideal} se representan las corrientes ide
 \end{figure}
 \FloatBarrier
 
-En la figura \ref{corrientes_alpha_beta} se pueden apreciar como las corrientes $\alpha\beta$ reflejan el ruido presente en las mediciones de los sensores de corriente, pero mantienen un comportamiento esperado a la salida de la transformada de Clarke con las dos señales sinusoidal con el desfase de $90^\circ$ entre señales, como es característico.
+En la figura \ref{corrientes_alpha_beta} se puede apreciar cómo las corrientes $\alpha\beta$ reflejan el ruido presente en las mediciones de los sensores de corriente, pero mantienen el comportamiento esperado a la salida de la transformada de Clarke, con las dos señales sinusoidales con un desfase de $90^\circ$ entre señales, como es característico.
 
 \newpage
 \subsection{Validación de la transformada de Park}
 
-Se validara los resultado a la salida de la transformada de Park en el microcontrolador.
+Se validarán los resultados a la salida de la transformada de Park en el microcontrolador.
 
 \begin{figure}[ht]
 	\centering
@@ -825,7 +860,7 @@ Se validara los resultado a la salida de la transformada de Park en el microcont
 \end{figure}
 \FloatBarrier
 
-En la figura \ref{corrientes_dq_ideal} se representan las corrientes ideales en el plano $dq$, donde lo ideal, es que la corriente directa tenga un valor de cero, para mantener la eficiencia del sistema, mientras que solo la corriente de cuadratura tiene un valor distinto a cero.
+En la figura \ref{corrientes_dq_ideal} se representan las corrientes ideales en el plano $dq$, donde lo ideal es que la corriente directa tenga un valor de cero, para mantener la eficiencia del sistema, mientras que solo la corriente de cuadratura tiene un valor distinto de cero.
 
 \begin{figure}[ht]
 	\centering
@@ -835,7 +870,7 @@ En la figura \ref{corrientes_dq_ideal} se representan las corrientes ideales en 
 \end{figure}
 \FloatBarrier
 
-En la figura \ref{corrientes_dq} se pueden apreciar como las corrientes $dq$ presenta una menor cantidad de ruido gracias a que su filtro complementario esta ajustado para una frecuencia de corte de $f_W=800Hz$, aunque igualmente presentan ciertas deformaciones y e inestabilidad con un patron aparentemente constante, pero en términos generales mantienen aproximadamente el comportamiento esperado a la salida de la transformada de Park.
+En la figura \ref{corrientes_dq} se puede apreciar cómo las corrientes $dq$ presentan una menor cantidad de ruido gracias a que su filtro complementario está ajustado para una frecuencia de corte de $f_W=800Hz$. Aunque igualmente presentan ciertas deformaciones e inestabilidad con un patrón aparentemente constante, en términos generales, mantienen aproximadamente el comportamiento esperado a la salida de la transformada de Park.
 
 \newpage
 \section{Validación de los Controladores PI}
@@ -896,15 +931,15 @@ En la Figura \ref{señal_timer}, se observan las señales PWM correspondientes a
 \chapter*{Comentarios y Conclusiones}
 \addcontentsline{toc}{chapter}{Comentarios y Conclusiones}
 
-\paragraph{Respecto al objetivo: ``Estudiar los principios del Control de Campo Orientado (FOC) y la modulación de espacio vectorial (SVM) para aplicarlos en el diseñó del controlador''} Se concluye que la base teórica relacionada con el funcionamiento de los motores \textit{brushless} y el Control de Campo Orientado (FOC) abarca un espectro más amplio que el revisado en este proyecto. Las transformadas de Clarke y Park simplifican el análisis e implementación del sistema, aunque sería posible profundizar en metodologías de control FOC directo.
+\paragraph{Respecto al objetivo: ``Estudiar los principios del Control de Campo Orientado (FOC) y la modulación de espacio vectorial (SVM) para aplicarlos en el diseño del controlador''} Se concluye que la base teórica relacionada con el funcionamiento de los motores \textit{brushless} y el Control de Campo Orientado (FOC) abarca un espectro más amplio que el revisado en este proyecto. Las transformadas de Clarke y Park simplifican el análisis e implementación del sistema, aunque sería posible profundizar en metodologías de control FOC directo.
 
-\paragraph{Respecto al objetivo: ``Diseñar el hardware para el controlador FOC, con los componentes mínimos necesarios para validar el funcionamiento''} Se concluye que el uso de \emph{Autodesk Eagle} facilita de manera significativa el proceso de diseñó tanto del esquemático como de la placa de circuito impreso (PCB). La disponibilidad de recursos y librerías en línea agiliza la búsqueda de los componentes específicos y su integración, garantizando la coherencia entre el símbolo de cada dispositivo y su respectivo \emph{footprint}. Además, la compatibilidad con los servicios de \emph{JLCPCB}, la cual proporciona reglas de diseñó y formatos de archivos \emph{Gerber} precisos, contribuyó a la fabricación eficiente y libre de inconvenientes de la placa.
+\paragraph{Respecto al objetivo: ``Diseñar el hardware para el controlador FOC, con los componentes mínimos necesarios para validar el funcionamiento''} Se concluye que el uso de \emph{Autodesk Eagle} facilita de manera significativa el proceso de diseño tanto del esquemático como de la placa de circuito impreso (PCB). La disponibilidad de recursos y librerías en línea agiliza la búsqueda de los componentes específicos y su integración, garantizando la coherencia entre el símbolo de cada dispositivo y su respectivo \emph{footprint}. Además, la compatibilidad con los servicios de \emph{JLCPCB}, que proporciona reglas de diseño y formatos de archivos \emph{Gerber} precisos, contribuyó a la fabricación eficiente y libre de inconvenientes de la placa.
 
 \paragraph{Respecto al objetivo: ``Configurar y programar el microcontrolador para el algoritmo FOC, utilizando las librerías HAL de STM32''} Se concluye que la utilización de \emph{STM32CubeMX} reduce de forma notable la complejidad inicial de configuración de los periféricos, puesto que automatiza gran parte del proceso y evita lidiar directamente con registros de bajo nivel y los usos avanzados de la biblioteca HAL. No obstante, el elevado número de módulos disponibles en la familia STM32H7 y la gran variedad de parámetros de configuración requirieron una curva de aprendizaje considerable para conseguir un ajuste óptimo. A pesar de ello, la configuración final aprovecha de manera significativa las prestaciones del microcontrolador.
 
 \paragraph{Respecto al objetivo: ``Validar el funcionamiento del controlador y proponer posibles mejoras para su aplicación en robótica competitiva''} Se concluye que el controlador desarrollado exhibe un desempeño estable en condiciones normales de operación. Sin embargo, las pruebas evidenciaron dificultades cuando se exige al sistema con aceleraciones bruscas o cambios de dirección repentinos. Además, aunque las compuertas AND permiten deshabilitar con seguridad el puente MOSFET ante posibles fallas, persiste el inconveniente de doble activación (\emph{shoot-through}) en determinadas circunstancias, lo que puede comprometer la integridad del prototipo. Dichas observaciones confirman la necesidad de perfeccionar tanto el hardware como el firmware para afrontar escenarios de carga extrema.
 
-\paragraph{Respecto al objetivo principal: ``Implementar un controlador de tipo FOC para motores \textit{brushless} con encoder, utilizando un microcontrolador STM32, que sirva de base para un driver especializado en la robótica competitiva''} Se concluye que el controlador constituye una solución \href{https://www.youtube.com/watch?v=XnAQtDEaI2I}{funcional} para requerimientos estándar y cumple con la finalidad de servir como base para un \emph{driver} especializado en robótica competitiva. A lo largo del documento, se sugieren mejoras potenciales en ambas vertientes hardware y firmware que podrían optimizar el comportamiento del sistema en condiciones extremas, habituales en competencias de robótica. Adicionalmente, el uso de la familia STM32, en particular de la serie H7, ofreció un rendimiento notable, aun considerando ciertas dificultades de arquitectura que surgieron durante la fase de desarrollo. En consecuencia, se confirma la versatilidad de estos dispositivos para aplicaciones de alto desempeño y se resalta su amplio margen de crecimiento en futuros desarrollos.
+\paragraph{Respecto al objetivo principal: ``Implementar un controlador de tipo FOC para motores \textit{brushless} con encoder, utilizando un microcontrolador STM32, que sirva de base para un driver especializado en la robótica competitiva''} Se concluye que el controlador constituye una solución \href{https://www.youtube.com/watch?v=XnAQtDEaI2I}{funcional} para requerimientos estándar y cumple con la finalidad de servir como base para un \emph{driver} especializado en robótica competitiva. A lo largo del documento, se sugieren mejoras potenciales en ambas vertientes, hardware y firmware, que podrían optimizar el comportamiento del sistema en condiciones extremas, habituales en competencias de robótica. Adicionalmente, el uso de la familia STM32, en particular de la serie H7, ofreció un rendimiento notable, aun considerando ciertas dificultades de arquitectura que surgieron durante la fase de desarrollo. En consecuencia, se confirma la versatilidad de estos dispositivos para aplicaciones de alto desempeño y se resalta su amplio margen de crecimiento en futuros desarrollos.
 
 \section*{Trabajos Futuros}
 \addcontentsline{toc}{chapter}{Trabajos Futuros}
@@ -917,16 +952,18 @@ En la Figura \ref{señal_timer}, se observan las señales PWM correspondientes a
 
 	\item \textbf{Mejorar el filtrado de la señal de corriente:} Reducir la frecuencia de corte del filtro o añadir etapas analógicas pasivas para minimizar el ruido en las mediciones, incrementando así la precisión en el lazo de control.
 
-	\item \textbf{Aumentar la versatilidad del sistema:} Explorar el soporte a un segundo motor y ampliar la capacidad de adquisición de datos, permitiendo el desarrollo de múltiples ejes de control para aplicaciones robóticas de mayor complejidad.
+	\item \textbf{Aumentar la versatilidad del sistema:} Explorar el soporte para un segundo motor y ampliar la capacidad de adquisición de datos, permitiendo el desarrollo de múltiples ejes de control para aplicaciones robóticas de mayor complejidad.
 
-	\item \textbf{Incorporar compensaciones de cogging torque:} Implementar algoritmos de calibración y compensación que disminuyan la vibración producida por el entrehierro, optimizando así la estabilidad de velocidad y el rendimiento general del motor.
+	\item \textbf{Incorporar compensaciones de \emph{cogging torque}:} Implementar algoritmos de calibración y compensación que disminuyan la vibración producida por el entrehierro, optimizando así la estabilidad de velocidad y el rendimiento general del motor.
 \end{itemize}
 
-\href{https://www.youtube.com/watch?v=2yJgwwDcgV8}{\phantom{ASDF--------------------ASDF}}
+\textbf{Link al repositorio Github: \url{https://github.com/eziron/driver_FOC}}
 
 \newpage
 \addcontentsline{toc}{chapter}{Bibliografía}
 \printbibliography
+
+\href{https://www.youtube.com/watch?v=2yJgwwDcgV8}{\phantom{ASDF--------------------ASDF}}
 
 %\newpage
 %\addcontentsline{toc}{chapter}{Anexos}
