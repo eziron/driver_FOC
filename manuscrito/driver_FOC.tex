@@ -139,27 +139,27 @@ Los motores \textit{brushless}, o motores sin escobillas de corriente continua (
 \end{figure}
 \FloatBarrier
 
-Similar a los motores trifásicos de corriente alterna, estos pueden tener configuraciones de bobinado en delta o estrella \cite{Millet2022}. Además, pueden presentar configuraciones \textit{in-runner}, donde los imanes están en el centro del eje con las bobinas en el exterior, o configuraciones \textit{out-runner} , donde los imanes se encuentran por fuera del motor, mientras que las bobinas están en el centro \cite{9774372}. Estos motores, al requerir una sincronización entre el campo magnético del estátor y el campo magnético del rotor, suelen utilizar encoders o sensores de efecto Hall para obtener información sobre la posición del eje, y de este modo, mantener una conmutación adecuada. No obstante, también es posible emplear técnicas \textit{sensorless} (sin sensor) para estimar la posición del rotor sin necesidad de sensores físicos. \cite{Gualtieri2018_STEP}
+Similar a los motores trifásicos de corriente alterna, estos pueden tener configuraciones de bobinado en delta o estrella \cite{Millet2022}. Además, como se ejemplifica en la figura \ref{fig:motor_sin_escobillas}, pueden presentar configuraciones \textit{in-runner}, donde los imanes están en el centro del eje con las bobinas en el exterior, o configuraciones \textit{out-runner} , donde los imanes se encuentran por fuera del motor, mientras que las bobinas están en el centro \cite{9774372}. Estos motores, al requerir una sincronización entre el campo magnético del estátor y el campo magnético del rotor, suelen utilizar encoders o sensores de efecto Hall para obtener información sobre la posición del eje, y de este modo, mantener una conmutación adecuada. No obstante, también es posible emplear técnicas \textit{sensorless} (sin sensor) para estimar la posición del rotor sin necesidad de sensores físicos. \cite{Gualtieri2018_STEP}
 
 Los \textit{BLDC} se destacan por ofrecer una mayor densidad de potencia, mayor torque, mejor eficiencias y pueden llegar a velocidades mas altas. Sin embargo, al requerir de un controlador electrónico que se encargue de la conmutación para generar el movimiento del rotor, la complejidad y los costos asociados a su implementación son mayores. \cite{AN885}
 
 \newpage
 \subsection{Control Orientado de Campo (FOC)}
-El control orientado de campo se basa en desacoplar el flujo electromagnético del par motor, permitiendo el control independiente de cada uno, aunque en este caso se realiza de forma indirecta, trabajando con las corrientes del estátor en ves de las variables en ves de las variables reales de flujo y par. Este desacoplamiento se logra mediante la transformación de las variables trifásicas del motor, que están en un marco de referencia estacionario \(ABC\), hacia un marco de referencia rotatorio \(dq\) que gira en sincronía con el rotor. \cite{power_conv_14}
+El control orientado de campo se basa en desacoplar el flujo electromagnético del par motor, permitiendo el control independiente de cada uno, aunque en este caso se realiza de forma indirecta, trabajando con las corrientes del estátor en ves de las variables reales de flujo y par. Este desacoplamiento se logra mediante la transformación de las variables trifásicas del motor, que están en un marco de referencia estacionario \(ABC\), hacia un marco de referencia rotatorio \(dq\) que gira en sincronía con el rotor del motor. \cite{power_conv_14}
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.9\textwidth]{imagenes/Diagramas/simpleFOC.jpg}
-	\caption{Diagrama de flujo del control FOC.\cite{Skuric_SimpleFOC_A_Field_2022}}
+	\caption{Diagrama de flujo del control FOC\cite{Skuric_SimpleFOC_A_Field_2022}.}
 	\label{fig:foc_transform}
 \end{figure}
 \FloatBarrier
 
-La transformación entre los marcos de referencia se realiza aplicando la transformada de Clarke y la transformada de Park. De esta forma, las variables que presentan un comportamiento oscilatorio en el tiempo se convierten en variables de corriente continua, lo que permite emular, en cierta medida, el funcionamiento de un motor con escobillas a nivel del controlador. \cite{power_conv_14}
+La figura \ref{fig:foc_transform}, presenta el diagrama de flujo base de un controlar FOC, con sus elementos esenciales, donde podemos apreciar la separación por hardware, controladores de corriente, ademas de los controladores de velocidad y posición. La transformación entre los marcos de referencia se realiza aplicando la transformada de Clarke y la transformada de Park. De esta forma, las mediciones de corriente que presentan un comportamiento oscilatorio en el tiempo se convierten en variables de corriente continua, lo que virtualmente emula, el funcionamiento de un motor con escobillas a nivel de los controladores\cite{power_conv_14}, posteriormente se aplican los controladores de corriente y velocidad para obtener las señales de control necesarias para el inversor trifásico. 
 
+\newpage
 \subsection{Transformada de Clarke}
 La transformada de Clarke convierte un sistema trifásico de corrientes \(ABC\) en un sistema bifásico \(\alpha\beta\), proyectando las corrientes en un sistema de coordenadas bidimensional estacionario. Esta transformación simplifica el análisis al reducir las tres corrientes de fase a dos componentes ortogonales, manteniendo la información esencial del sistema original. \cite{AN1078}
-
 
 \begin{figure}[ht]
 	\centering
@@ -169,17 +169,20 @@ La transformada de Clarke convierte un sistema trifásico de corrientes \(ABC\) 
 \end{figure}
 \FloatBarrier
 
-\newpage
+En la figura \ref{fig:clarke_transform} se ilustra la representación gráfica de las corrientes de entrada \(i_a, i_b, i_c\) y las corrientes de salida \(i_\alpha, i_\beta\). Además, se incluyen las ecuaciones necesarias para llevar a cabo la transformación.
+
 \subsection{Transformada de Park}
-La transformada de Park convierte el sistema en el marco de referencia estacionario \(\alpha\beta\) en el sistema en el marco de referencia rotatorio \(dq\) sincronizado con ángulo del rotor. \cite{AN1078}
+La transformada de Park convierte el sistema en el marco de referencia estacionario \(\alpha\beta\) en el sistema en el marco de referencia rotatorio \(dq\) sincronizado con ángulo del rotor\cite{AN1078}.
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.8\textwidth]{imagenes/Diagramas/park.png}
 	\caption{Esquema transformada de Park.}
+	\label{fig:park_transform}
 \end{figure}
 \FloatBarrier
 
+En la figura \ref{fig:park_transform} se muestra gráficamente cómo las variables \(\alpha, \beta\) se transforman a \(d, q\), junto con las ecuaciones empleadas para llevar a cabo esta transformación.
 
 \subsection{Transformada inversa de Park}
 La transformada inversa de Park convierte el sistema en el marco de referencia rotatorio \(dq\) de vuelta al marco de referencia estacionario \(\alpha\beta\). \cite{AN1078}.
@@ -188,47 +191,51 @@ La transformada inversa de Park convierte el sistema en el marco de referencia r
 	\centering
 	\includegraphics[width=0.8\textwidth]{imagenes/Diagramas/park_inv.png}
 	\caption{Esquema transformada inversa de Park.}
+	\label{fig:park_inv_transform}
 \end{figure}
 \FloatBarrier
 
-\newpage
+En la figura \ref{fig:park_inv_transform} se ilustra cómo las variables \(d, q\) se transforman nuevamente a \(\alpha, \beta\), con las ecuaciones correspondientes a este proceso inverso.
+
 \subsection{Modulación de Espacio Vectorial (SVM)}
-La Modulación por Vector Espacial (SVM) es una técnica utilizada para el control digital de inversores de voltaje. Representa los estados de conmutación del inversor como vectores de voltaje en el plano $\alpha$-$\beta$, formando un hexágono regular dividido en seis sectores o sextantes.
+La Modulación por Vector Espacial (SVM) es una técnica utilizada para el control digital de inversores de voltaje. Representa todos los estados de conmutación del inversor como vectores de voltaje en el plano $\alpha$-$\beta$, formando un hexágono regular dividido en seis sectores o sextantes como se pueden ver el la figura \ref{fig:sectantes}. Estos son utilizados para sintetizar el vector de referencia $\mathbf{V}_{\text{ref}}=(V_{\alpha},V_{\beta})$ mediante una suma ponderada de los vectores de voltaje adyacentes en el sextante donde se encuentre, para finalmente calcular los tiempos de activación necesarios en cada face el inversor, logrando una aproximación más \href{https://www.youtube.com/watch?v=NY0ffyEu6uo}{precisa} de la señal deseada.
+
+%\begin{figure}[ht]
+%	\centering
+%	\includegraphics[width=0.6\textwidth]{imagenes/Diagramas/SVM.png}
+%	\caption{Esquema SVM.}
+%	\label{fig:esquema_svm}
+%\end{figure}
+%\FloatBarrier
+
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.6\textwidth]{imagenes/Diagramas/SVM.png}
-	\caption{Esquema SVM.}
-\end{figure}
-\FloatBarrier
-
-Esta técnica busca sintetizar el vector de referencia $\mathbf{V}_{\text{ref}}=(V_{\alpha},V_{\beta})$ mediante una suma ponderada de los vectores de voltaje adyacentes en el sextante donde se encuentre, logrando una aproximación más \href{https://www.youtube.com/watch?v=NY0ffyEu6uo}{precisa} de la señal deseada.
-
-\begin{figure}[ht]
-	\centering
-	\includegraphics[width=0.5\textwidth]{imagenes/Diagramas/sectantes.png}
+	\includegraphics[width=0.55\textwidth]{imagenes/Diagramas/sectantes.png}
 	\caption{Sextantes en SVM.}
+	\label{fig:sectantes}
 \end{figure}
 \FloatBarrier
 
-Se utiliza un patrón de activación específico que permite minimizar la frecuencia de conmutación de los transistores, aprovechando estados redundantes para reducir las pérdidas asociadas a la conmutación y mejorar la eficiencia del sistema. \cite{power_conv_06}
+%Se utiliza un patrón de activación específico que permite minimizar la frecuencia de conmutación de los transistores, aprovechando estados redundantes para reducir las pérdidas asociadas a la conmutación y mejorar la eficiencia del sistema\cite{power_conv_06}, como se muestra en la tabla \ref{tabla_svm}, la secuencia de activación es especifica para cada sextante. 
 
-\begin{table}[htbp]
-	\centering
-	\caption{Secuencia de Conmutación en SVM}
-	\begin{tabular}{ c c c c c c c c }
-		\hline
-		\textbf{Sector} & \textbf{1}       & \textbf{2}       & \textbf{3}       & \textbf{4}       & \textbf{5}       & \textbf{6}       & \textbf{7}       \\
-		\hline
-		I               & $\vec{V}_0(000)$ & $\vec{V}_1(100)$ & $\vec{V}_2(110)$ & $\vec{V}_7(111)$ & $\vec{V}_2(110)$ & $\vec{V}_1(100)$ & $\vec{V}_0(000)$ \\
-		II              & $\vec{V}_0(000)$ & $\vec{V}_3(010)$ & $\vec{V}_2(110)$ & $\vec{V}_7(111)$ & $\vec{V}_2(110)$ & $\vec{V}_3(010)$ & $\vec{V}_0(000)$ \\
-		III             & $\vec{V}_0(000)$ & $\vec{V}_3(010)$ & $\vec{V}_4(011)$ & $\vec{V}_7(111)$ & $\vec{V}_4(011)$ & $\vec{V}_3(010)$ & $\vec{V}_0(000)$ \\
-		IV              & $\vec{V}_0(000)$ & $\vec{V}_5(001)$ & $\vec{V}_4(011)$ & $\vec{V}_7(111)$ & $\vec{V}_4(011)$ & $\vec{V}_5(001)$ & $\vec{V}_0(000)$ \\
-		V               & $\vec{V}_0(000)$ & $\vec{V}_5(001)$ & $\vec{V}_6(101)$ & $\vec{V}_7(111)$ & $\vec{V}_6(101)$ & $\vec{V}_5(001)$ & $\vec{V}_0(000)$ \\
-		VI              & $\vec{V}_0(000)$ & $\vec{V}_1(100)$ & $\vec{V}_6(101)$ & $\vec{V}_7(111)$ & $\vec{V}_6(101)$ & $\vec{V}_1(100)$ & $\vec{V}_0(000)$ \\
-		\hline
-	\end{tabular}
-\end{table}
+%\begin{table}[htbp]
+%	\centering
+%	\caption{Secuencia de Conmutación en SVM}
+%	\begin{tabular}{ c c c c c c c c }
+%		\hline
+%		\textbf{Sector} & \textbf{1}       & \textbf{2}       & \textbf{3}       & \textbf{4}       & \textbf{5}       & \textbf{6}       & \textbf{7}       \\
+%		\hline
+%		I               & $\vec{V}_0(000)$ & $\vec{V}_1(100)$ & $\vec{V}_2(110)$ & $\vec{V}_7(111)$ & $\vec{V}_2(110)$ & $\vec{V}_1(100)$ & $\vec{V}_0(000)$ \\
+%		II              & $\vec{V}_0(000)$ & $\vec{V}_3(010)$ & $\vec{V}_2(110)$ & $\vec{V}_7(111)$ & $\vec{V}_2(110)$ & $\vec{V}_3(010)$ & $\vec{V}_0(000)$ \\
+%		III             & $\vec{V}_0(000)$ & $\vec{V}_3(010)$ & $\vec{V}_4(011)$ & $\vec{V}_7(111)$ & $\vec{V}_4(011)$ & $\vec{V}_3(010)$ & $\vec{V}_0(000)$ \\
+%		IV              & $\vec{V}_0(000)$ & $\vec{V}_5(001)$ & $\vec{V}_4(011)$ & $\vec{V}_7(111)$ & $\vec{V}_4(011)$ & $\vec{V}_5(001)$ & $\vec{V}_0(000)$ \\
+%		V               & $\vec{V}_0(000)$ & $\vec{V}_5(001)$ & $\vec{V}_6(101)$ & $\vec{V}_7(111)$ & $\vec{V}_6(101)$ & $\vec{V}_5(001)$ & $\vec{V}_0(000)$ \\
+%		VI              & $\vec{V}_0(000)$ & $\vec{V}_1(100)$ & $\vec{V}_6(101)$ & $\vec{V}_7(111)$ & $\vec{V}_6(101)$ & $\vec{V}_1(100)$ & $\vec{V}_0(000)$ \\
+%		\hline
+%	\end{tabular}
+%	\label{tabla_svm}
+%\end{table}
 %cuarto párrafo
 
 \newpage
@@ -303,7 +310,7 @@ El punto de partida es la selección del motor, que define parámetros cruciales
 \end{figure}
 \FloatBarrier
 \newpage
-Se ha optado por utilizar el motor \textbf{SunnySky X3120 V3} de 585Kv para el diseñó del controlador debido a su disponibilidad inmediata. Este es un motor principalmente orientado al uso en drones de tipo aeroplano, pero su gran potencia y bajo peso lo hace ideal para su uso en robots sumo.
+Se ha optado por utilizar el motor \textbf{SunnySky X3120 V3} de 585Kv para el diseñó del controlador debido a su disponibilidad inmediata. Este es un motor principalmente orientado al uso en drones de tipo aeroplano, pero su gran potencia y bajo peso lo hace ideal para su uso en robots sumo, como se puede ver en la figura \ref{X3120}, se trata de un motor tipo outrunner, en el cual su eje se extiende y sale por la base del motor.
 
 \begin{table}[h!]
 	\centering
@@ -314,7 +321,7 @@ Se ha optado por utilizar el motor \textbf{SunnySky X3120 V3} de 585Kv para el d
 		\hline
 		Número de polos del rotor        & 14             \\
 		Número de ranuras del estátor    & 12             \\
-		Máxima celda Lipo                & 6S (22.2 V)    \\
+		Voltaje Nominal (celdas de Lipo) & 6S (22.2 V)    \\
 		Constante de velocidad del motor & 585 $K_v$      \\
 		Resistencia del motor            & 43.5 m$\Omega$ \\
 		Corriente continua máxima        & 65 A/30 s      \\
@@ -330,7 +337,7 @@ Algunos de los parámetros mas relevantes para el diseñó del hardware son el v
 \newpage
 \subsection{Encoder}
 
-El encoder es el encargado de proveer la información sobre la posición angular del rotor en el motor, se utilizó el encoder magnético AS5047P, el cual utiliza un imán especial con una polarización diametral en el eje del motor y un arreglo de sensores HAL internos, para poder medir e interpretar la posición angular del imán.
+El encoder es el encargado de proveer la información sobre la posición angular del rotor en el motor, se utilizó el encoder magnético AS5047P (figura \ref{AS5047P}), el cual utiliza un imán especial con una polarización diametral en el eje del motor y un arreglo de sensores HAL internos, para poder medir e interpretar la posición angular del imán.
 
 \begin{figure}[ht]
 	\centering
@@ -362,39 +369,43 @@ En esencia este es un encoder absoluto que funciona principalmente a traves de u
 \FloatBarrier
 
 \newpage
-\subsection{Conjunto motor encoder}
-El encoder requiere estar fijo junto al motor y centrado respecto al eje del motor, por esto se diseñó en Autodesk Inventor y posteriormente se fabricó con impresión 3D, una montura hecha a la medida para el conjunto motor-encoder.
+\subsection{Conjunto motor-encoder}
+El encoder requiere estar fijo junto al motor y centrado respecto al eje de este para poder realizar su medición. Para ello, se diseñó en Autodesk Inventor y posteriormente se fabricó con impresión 3D un conjunto de soportes y sockets específicos para el motor-encoder.
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.5\textwidth]{imagenes/Motor/conjunto.png}
+	\includegraphics[width=0.4\textwidth]{imagenes/Motor/conjunto.png}
 	\caption{Montura motor-encoder.}
 	\label{fig:Montura}
 \end{figure}
 \FloatBarrier
 
+En la figura \ref{fig:Montura} se observa la \textbf{montura del motor y encoder}. Este conjunto de soporte sujeta el motor y se extiende hacia la parte trasera, de modo que mantiene el encoder firmemente posicionado.
+
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.5\textwidth]{imagenes/Motor/encoder.png}
+	\includegraphics[width=0.4\textwidth]{imagenes/Motor/encoder.png}
 	\caption{Socket Encoder.}
 	\label{fig:encoder}
 \end{figure}
 \FloatBarrier
 
-También se diseñó un socket con el fin de mantener el imán necesario para el funcionamiento del en coder en el centro del eje del motor.
+En la figura \ref{fig:encoder} se muestra el \textbf{socket del encoder}. Este componente asegura que el chip del encoder quede correctamente alineado con el centro del eje del motor.
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.5\textwidth]{imagenes/Motor/iman.png}
+	\includegraphics[width=0.4\textwidth]{imagenes/Motor/iman.png}
 	\caption{Socket imán axial.}
 	\label{fig:iman}
 \end{figure}
 \FloatBarrier
 
+Asimismo, se diseñó un \textbf{socket para el imán} (figura \ref{fig:iman}) con el fin de mantener el imán necesario para el funcionamiento del encoder perfectamente centrado en el eje del motor. Este socket se atornilla al rotor y está fabricado en ABS para resistir mejor las temperaturas elevadas que puedan generarse.
+
 \newpage
 \subsection{Puente Mosfet}
 
-El puente mosfet es una de las partes del hardware mas critica, este se encarga de realizar las conmutaciones en las fases del motor, se divide en 3 piernas (o fases) iguales, donde cada pierna está conformada por 2 mosfets de tipo N en configuración push-pull, es decir, se tiene un mosfet alto conectado a $V+$ y un mosfet bajo conectado a $V-$. cada mosfet tiene su propia señal de gate las cuales se deben controlar de forma adecuada para evitar cortocircuitos. es importante considerar que cada pierna del puente debe soportar por lo menos la corriente máxima del motor, aun que idealmente se deja un margen de seguridad de 2 a 3 veces la corriente máxima, considerando la corriente de 65A del sunnysky X3120, los mosfets deberán de soporta al menos 195A continuos y un voltaje Drain-source sobre los 25.2V para poder trabajar con la batería 6S.
+El puente mosfet es una de las partes del hardware mas critica, este se encarga de realizar las conmutaciones en las fases del motor, como se puede ver el la figura \ref{puente_MOSFET}, se divide en 3 piernas (o fases) iguales, donde cada pierna está conformada por 2 mosfets de tipo N en configuración push-pull, es decir, se tiene un mosfet alto conectado a $V+$ y un mosfet bajo conectado a $V-$. cada mosfet tiene su propia señal de gate las cuales se deben controlar de forma adecuada para evitar cortocircuitos. es importante considerar que cada pierna del puente debe soportar por lo menos la corriente máxima del motor, aun que idealmente se deja un margen de seguridad de 2 a 3 veces la corriente máxima, considerando la corriente de 65A del sunnysky X3120, los mosfets deberán de soporta al menos 195A continuos y un voltaje Drain-source sobre los 25.2V para poder trabajar con la batería 6S.
 
 \begin{figure}[ht]
 	\centering
@@ -438,7 +449,7 @@ El controlador de puerta (gate driver) se encarga de recibir las señales PWM pr
 \end{figure}
 \FloatBarrier
 
-Se utilizó el controlador de puerta \textbf{UCC27211} de Texas Instruments, el cual es un driver de doble canal diseñado específicamente para controlar pares de MOSFETs. Este dispositivo ofrece entradas de control independientes para los MOSFETs de alta (\texttt{H In}) y baja (\texttt{L In}), lo que permite un control preciso y flexible de cada transistor de potencia.
+Se utilizó el controlador de puerta \textbf{UCC27211} de Texas Instruments, el cual es un driver de doble canal diseñado específicamente para controlar pares de MOSFETs y como se puede ver en la figura \ref{UCC27211}, este tiene un esquema de conexiones bastante simple. Este dispositivo ofrece entradas de control independientes para los MOSFETs de alta (\texttt{H In}) y baja (\texttt{L In}), lo que permite un control preciso y flexible de cada transistor de potencia.
 
 \begin{table}[ht]
 	\centering
@@ -456,7 +467,7 @@ Se utilizó el controlador de puerta \textbf{UCC27211} de Texas Instruments, el 
 \FloatBarrier
 
 \newpage
-Es importante destacar que el UCC2711 no incorpora protección interna contra la conducción simultánea de ambos MOSFETs conocido como \textbf{shoot-through}. Este fenómeno ocurre ambos MOSFETs de una pierna conducen al mismo tiempo, generando un cortocircuito entre el suministro de voltaje y tierra. Para evitar esta situación es importante agregar un tiempo entre la conmutación de las señales de entrada conocido como \textbf{Dead-Time}, el cual se estima considerando los tiempos de conmutación del controlador de puerta junto al tiempo de conmutación del mosfet
+Como se puede apreciar en la tabla \ref{tab:device_logic}, el UCC2711 no incorpora protección interna contra la conducción simultánea de ambos MOSFETs conocido como \textbf{shoot-through}. Este fenómeno ocurre cuando ambos MOSFETs de una pierna se activan y conducen al mismo tiempo, generando un cortocircuito entre el suministro de voltaje y tierra. Para evitar esta situación es importante agregar un tiempo entre la conmutación de las señales de entrada conocido como \textbf{Dead-Time}, el cual se estima considerando los tiempos de conmutación del controlador de puerta junto al tiempo de conmutación del mosfet
 
 \begin{figure}[ht]
 	\centering
@@ -466,7 +477,7 @@ Es importante destacar que el UCC2711 no incorpora protección interna contra la
 \end{figure}
 \FloatBarrier
 
-El UCC27211 no dispone de un pin para activar o desactivar el control de los mosfets, por su parte, la única forma de desactivar el puente mosfet en su totalidad es llevar las señales de entrada alta (H In) y baja (L In) a un estado bajo (L), además el microcontrolador al realizar esta acción puede llegar a perder el control sobre el estado de las señales PWM y asi generar por un breve momento un estado de doble activación de los mosfet. para evitar esto se agregaron externamente comportas AND modelo SN74LVC1G08DBVR en cada señal PWM, con el fin de poder cortar las señales desde el microcontrolador de forma segura.
+El UCC27211 no dispone de un pin para activar o desactivar el control de los mosfets, por su parte, la única forma de desactivar el puente mosfet en su totalidad es llevar las señales de entrada alta (H In) y baja (L In) a un estado bajo (L), además el microcontrolador al realizar esta acción puede llegar a perder el control sobre el estado de las señales PWM y asi generar por un breve momento un estado de doble activación de los mosfet. para evitar esto se agregaron externamente dos compuertas AND modelo SN74LVC1G08DBVR en cada señal PWM, como se puede ver en la figura \ref{fig:control-pwm-and}, con el fin de poder cortar las señales desde el microcontrolador de forma segura y asi desactivar el puente mosfet, el comportamiento final con este agregado se puede ver en la tabla \ref{UCC27211_logic}.
 
 \begin{table}[ht]
 	\centering
@@ -720,11 +731,11 @@ Completada esta configuración inicial, el sistema entra en un \textbf{bucle pri
 
 La \textbf{rutina de interrupción} \href{https://www.youtube.com/watch?v=RJX_jYm8T84}{asociada} al \texttt{Timer 1} maneja el \textbf{lazo de control del motor} y se ejecuta a una frecuencia de 48 kHz. Su funcionamiento comienza con la obtención de datos provenientes de diversos periféricos, tales como:
 \begin{itemize}
-    \item Tiempos medidos por los \textbf{timers}.
-    \item Posición del \textbf{encoder}.
-    \item Lecturas de los \textbf{ADCs}.
+	\item Tiempos medidos por los \textbf{timers}.
+	\item Posición del \textbf{encoder}.
+	\item Lecturas de los \textbf{ADCs}.
 \end{itemize}
-En primer lugar, se \textbf{normalizan} los valores capturados para poder trabajar con estos desde valore reales. A continuación, se aplican las \textbf{transformadas de Clarke y Park} para obtener las variables de estado del motor. 
+En primer lugar, se \textbf{normalizan} los valores capturados para poder trabajar con estos desde valore reales. A continuación, se aplican las \textbf{transformadas de Clarke y Park} para obtener las variables de estado del motor.
 
 Posteriormente, una \textbf{máquina de estado} administra los diferentes modos de operación (por ejemplo, el retorno a \emph{home} o diversas configuraciones del lazo de control). Finalmente, los valores de salida de los \textbf{controladores PI} se transforman de nuevo mediante la inversa de Park y se emplea la \textbf{SVM} para calcular las señales de \emph{PWM} correspondientes..
 
