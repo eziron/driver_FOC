@@ -62,7 +62,7 @@ void Error_Handler(void);
 #define TIMER_ADC_CCR (TIMER_PERIOD - TIMER_ADC_DELTA)
 #define TIMER_ADC_DELTA 24
 #define TIMER_PERIOD 5000
-#define INPUT_FILTER 5
+#define INPUT_FILTER 4
 #define TIMER_PRESCALER 0
 #define TIMER_REPETICION_COUNTER 0
 #define SW_1_Pin GPIO_PIN_2
